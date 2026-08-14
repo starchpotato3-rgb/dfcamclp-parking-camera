@@ -1377,14 +1377,10 @@ function orderPoints(
 
 function detectDocument(){
 
-  const cv =
-    window.cv;
-
-
   if(
-    !cv ||
     !video.videoWidth ||
-    !video.videoHeight
+    !video.videoHeight ||
+    !workCanvas
   ){
 
     return null;
@@ -1392,41 +1388,43 @@ function detectDocument(){
   }
 
 
+  /*
+   * ========================================================
+   * SMALL WORKING IMAGE
+   *
+   * We preserve the camera's original aspect ratio.
+   * This keeps the real Student ID proportions.
+   * ========================================================
+   */
+
   const scanWidth =
     320;
-
-
-  const scale =
-    scanWidth /
-    video.videoWidth;
-
 
   const scanHeight =
     Math.round(
       video.videoHeight *
-      scale
+      scanWidth /
+      video.videoWidth
     );
 
 
   workCanvas.width =
     scanWidth;
 
-
   workCanvas.height =
     scanHeight;
 
 
-  const ctx =
+  const context =
     workCanvas.getContext(
       '2d',
       {
-        willReadFrequently:
-          true
+        willReadFrequently:true
       }
     );
 
 
-  ctx.drawImage(
+  context.drawImage(
 
     video,
 
@@ -1440,126 +1438,640 @@ function detectDocument(){
 
 
   const imageData =
-    ctx.getImageData(
+    context.getImageData(
+
       0,
       0,
 
       scanWidth,
       scanHeight
+
     );
 
 
-  const src =
-    cv.matFromImageData(
-      imageData
-    );
+  const pixels =
+    imageData.data;
 
+
+  /*
+   * ========================================================
+   * CONVERT TO GRAYSCALE
+   * ========================================================
+   */
 
   const gray =
-    new cv.Mat();
+    new Float32Array(
+      scanWidth *
+      scanHeight
+    );
 
 
-  const blur =
-    new cv.Mat();
+  let p =
+    0;
 
 
-  const edges =
-    new cv.Mat();
+  for(
+    let y = 0;
+    y < scanHeight;
+    y++
+  ){
+
+    for(
+      let x = 0;
+      x < scanWidth;
+      x++
+    ){
+
+      const r =
+        pixels[p];
 
 
-  const contours =
-    new cv.MatVector();
+      const g =
+        pixels[p + 1];
 
 
-  const hierarchy =
-    new cv.Mat();
+      const b =
+        pixels[p + 2];
+
+
+      gray[
+        y *
+        scanWidth +
+        x
+      ] =
+
+        (
+          0.299 * r +
+          0.587 * g +
+          0.114 * b
+        );
+
+
+      p += 4;
+
+    }
+
+  }
+
+
+  /*
+   * ========================================================
+   * EDGE PROFILES
+   *
+   * Vertical profile = likely left/right ID edges.
+   *
+   * Horizontal profile = likely top/bottom ID edges.
+   * ========================================================
+   */
+
+  const vertical =
+    new Float32Array(
+      scanWidth - 2
+    );
+
+
+  const horizontal =
+    new Float32Array(
+      scanHeight - 2
+    );
+
+
+  const vTop =
+    Math.floor(
+      scanHeight *
+      0.08
+    );
+
+
+  const vBottom =
+    Math.floor(
+      scanHeight *
+      0.92
+    );
+
+
+  const hLeft =
+    Math.floor(
+      scanWidth *
+      0.12
+    );
+
+
+  const hRight =
+    Math.floor(
+      scanWidth *
+      0.88
+    );
+
+
+  /*
+   * Vertical edges.
+   */
+
+  for(
+    let x = 1;
+    x < scanWidth - 1;
+    x++
+  ){
+
+    let total =
+      0;
+
+
+    let count =
+      0;
+
+
+    for(
+      let y = vTop;
+      y < vBottom;
+      y++
+    ){
+
+      const left =
+        gray[
+          y *
+          scanWidth +
+          x - 1
+        ];
+
+
+      const right =
+        gray[
+          y *
+          scanWidth +
+          x + 1
+        ];
+
+
+      total +=
+        Math.abs(
+          right -
+          left
+        );
+
+
+      count++;
+
+    }
+
+
+    vertical[x - 1] =
+      total /
+      count;
+
+  }
+
+
+  /*
+   * Horizontal edges.
+   */
+
+  for(
+    let y = 1;
+    y < scanHeight - 1;
+    y++
+  ){
+
+    let total =
+      0;
+
+
+    let count =
+      0;
+
+
+    for(
+      let x = hLeft;
+      x < hRight;
+      x++
+    ){
+
+      const top =
+        gray[
+          (y - 1) *
+          scanWidth +
+          x
+        ];
+
+
+      const bottom =
+        gray[
+          (y + 1) *
+          scanWidth +
+          x
+        ];
+
+
+      total +=
+        Math.abs(
+          bottom -
+          top
+        );
+
+
+      count++;
+
+    }
+
+
+    horizontal[y - 1] =
+      total /
+      count;
+
+  }
+
+
+  /*
+   * ========================================================
+   * SMOOTH 1-D SIGNAL
+   * ========================================================
+   */
+
+  function smooth(
+    array,
+    radius
+  ){
+
+    const result =
+      new Float32Array(
+        array.length
+      );
+
+
+    for(
+      let i = 0;
+      i < array.length;
+      i++
+    ){
+
+      let total =
+        0;
+
+      let count =
+        0;
+
+
+      for(
+        let j =
+          Math.max(
+            0,
+            i - radius
+          );
+
+        j <=
+          Math.min(
+            array.length - 1,
+            i + radius
+          );
+
+        j++
+      ){
+
+        total +=
+          array[j];
+
+        count++;
+
+      }
+
+
+      result[i] =
+        total /
+        count;
+
+    }
+
+
+    return result;
+
+  }
+
+
+  const verticalSmooth =
+    smooth(
+      vertical,
+      4
+    );
+
+
+  const horizontalSmooth =
+    smooth(
+      horizontal,
+      4
+    );
+
+
+  /*
+   * ========================================================
+   * FIND STRONG EDGE PEAKS
+   * ========================================================
+   */
+
+  function getPeaks(
+    array,
+    start,
+    end,
+    maxPeaks,
+    minimumDistance
+  ){
+
+    const candidates =
+      [];
+
+
+    for(
+      let i = start;
+      i < end;
+      i++
+    ){
+
+      candidates.push({
+
+        index:
+          i,
+
+        value:
+          array[i]
+
+      });
+
+    }
+
+
+    candidates.sort(
+      function(a,b){
+
+        return (
+          b.value -
+          a.value
+        );
+
+      }
+    );
+
+
+    const selected =
+      [];
+
+
+    for(
+      const candidate
+      of candidates
+    ){
+
+      let farEnough =
+        true;
+
+
+      for(
+        const current
+        of selected
+      ){
+
+        if(
+          Math.abs(
+            candidate.index -
+            current.index
+          ) <
+          minimumDistance
+        ){
+
+          farEnough =
+            false;
+
+          break;
+
+        }
+
+      }
+
+
+      if(
+        farEnough
+      ){
+
+        selected.push(
+          candidate
+        );
+
+      }
+
+
+      if(
+        selected.length >=
+        maxPeaks
+      ){
+
+        break;
+
+      }
+
+    }
+
+
+    return selected;
+
+  }
+
+
+  /*
+   * Left and right ID edges.
+   */
+
+  const leftPeaks =
+    getPeaks(
+
+      verticalSmooth,
+
+      Math.floor(
+        scanWidth *
+        0.08
+      ),
+
+      Math.floor(
+        scanWidth *
+        0.48
+      ),
+
+      14,
+
+      8
+
+    );
+
+
+  const rightPeaks =
+    getPeaks(
+
+      verticalSmooth,
+
+      Math.floor(
+        scanWidth *
+        0.52
+      ),
+
+      Math.floor(
+        scanWidth *
+        0.92
+      ),
+
+      14,
+
+      8
+
+    );
+
+
+  /*
+   * ========================================================
+   * EXPECTED PHYSICAL ID RATIO
+   *
+   * Vertical card:
+   * 54 mm × 85.6 mm
+   *
+   * Width / Height ≈ 0.631
+   * ========================================================
+   */
+
+  const expectedRatio =
+    54 / 85.6;
 
 
   let best =
     null;
 
 
-  try{
+  /*
+   * ========================================================
+   * TEST POSSIBLE LEFT/RIGHT PAIRS
+   * ========================================================
+   */
 
-    cv.cvtColor(
-      src,
-      gray,
-      cv.COLOR_RGBA2GRAY
-    );
-
-
-    cv.GaussianBlur(
-
-      gray,
-
-      blur,
-
-      new cv.Size(
-        3,
-        3
-      ),
-
-      0
-
-    );
-
-
-    cv.Canny(
-
-      blur,
-
-      edges,
-
-      70,
-
-      150
-
-    );
-
-
-    cv.findContours(
-
-      edges,
-
-      contours,
-
-      hierarchy,
-
-      cv.RETR_EXTERNAL,
-
-      cv.CHAIN_APPROX_SIMPLE
-
-    );
-
-
-    const frameArea =
-      scanWidth *
-      scanHeight;
-
+  for(
+    const left
+    of leftPeaks
+  ){
 
     for(
-      let i = 0;
-      i < contours.size();
-      i++
+      const right
+      of rightPeaks
     ){
 
-      const contour =
-        contours.get(i);
+      const leftX =
+        left.index + 1;
 
 
-      try{
+      const rightX =
+        right.index + 1;
 
-        const area =
-          Math.abs(
-            cv.contourArea(
-              contour
-            )
-          );
+
+      const width =
+        rightX -
+        leftX;
+
+
+      /*
+       * ID should take a meaningful
+       * portion of the screen.
+       */
+
+      if(
+        width <
+        scanWidth *
+        0.24
+      ){
+
+        continue;
+
+      }
+
+
+      /*
+       * Infer expected ID height
+       * from physical proportions.
+       */
+
+      const expectedHeight =
+        width /
+        expectedRatio;
+
+
+      if(
+        expectedHeight <
+        scanHeight *
+        0.45 ||
+
+        expectedHeight >
+        scanHeight *
+        0.96
+      ){
+
+        continue;
+
+      }
+
+
+      const centerX =
+        (
+          leftX +
+          rightX
+        ) / 2;
+
+
+      const normalizedCenterX =
+        centerX /
+        scanWidth;
+
+
+      /*
+       * The ID must be reasonably centered.
+       */
+
+      if(
+        normalizedCenterX <
+        0.25 ||
+
+        normalizedCenterX >
+        0.75
+      ){
+
+        continue;
+
+      }
+
+
+      /*
+       * ====================================================
+       * TEST POSSIBLE VERTICAL POSITIONS
+       * ====================================================
+       */
+
+      for(
+        let centerY =
+          scanHeight * 0.35;
+
+        centerY <=
+          scanHeight * 0.65;
+
+        centerY +=
+          scanHeight * 0.0125
+      ){
+
+        const topY =
+          centerY -
+          expectedHeight / 2;
+
+
+        const bottomY =
+          centerY +
+          expectedHeight / 2;
 
 
         if(
-          area <
-          frameArea * 0.08
+          topY < 2 ||
+          bottomY >
+            scanHeight - 2
         ){
 
           continue;
@@ -1567,278 +2079,335 @@ function detectDocument(){
         }
 
 
-        const perimeter =
-          cv.arcLength(
-            contour,
-            true
-          );
+        /*
+         * Find the strongest horizontal
+         * edge close to the estimated
+         * top and bottom.
+         */
 
-
-        if(
-          perimeter <= 0
+        function localMaximum(
+          array,
+          position,
+          radius
         ){
 
-          continue;
-
-        }
-
-
-        const approx =
-          new cv.Mat();
-
-
-        try{
-
-          cv.approxPolyDP(
-
-            contour,
-
-            approx,
-
-            perimeter * 0.035,
-
-            true
-
-          );
-
-
-          if(
-            approx.rows !== 4
-          ){
-
-            continue;
-
-          }
-
-
-          const points =
-            [];
-
-
-          for(
-            let j = 0;
-            j < 4;
-            j++
-          ){
-
-            points.push({
-
-              x:
-                approx.intAt(
-                  j,
-                  0
-                ) / scale,
-
-              y:
-                approx.intAt(
-                  j,
-                  1
-                ) / scale
-
-            });
-
-          }
-
-
-          const ordered =
-            orderPoints(
-              points
+          const start =
+            Math.max(
+              0,
+              Math.floor(
+                position -
+                radius
+              )
             );
 
 
-          if(
-            !ordered
-          ){
-
-            continue;
-
-          }
-
-
-          const width =
-
-            (
-              distance(
-                ordered[0],
-                ordered[1]
+          const end =
+            Math.min(
+              array.length,
+              Math.ceil(
+                position +
+                radius
               )
-
-              +
-
-              distance(
-                ordered[3],
-                ordered[2]
-              )
-
-            ) / 2;
+            );
 
 
-          const height =
-
-            (
-              distance(
-                ordered[0],
-                ordered[3]
-              )
-
-              +
-
-              distance(
-                ordered[1],
-                ordered[2]
-              )
-
-            ) / 2;
+          let max =
+            0;
 
 
-          if(
-            width <= 0 ||
-            height <= 0
+          for(
+            let i =
+              start;
+
+            i < end;
+
+            i++
           ){
 
-            continue;
+            if(
+              array[i] >
+              max
+            ){
+
+              max =
+                array[i];
+
+            }
 
           }
 
 
-          const ratio =
-            width /
-            height;
-
-
-          /*
-           * Vertical ID.
-           */
-
-          if(
-            ratio < 0.42 ||
-            ratio > 0.90
-          ){
-
-            continue;
-
-          }
-
-
-          const centerX =
-
-            (
-              ordered[0].x +
-              ordered[1].x +
-              ordered[2].x +
-              ordered[3].x
-
-            ) / 4;
-
-
-          const centerY =
-
-            (
-              ordered[0].y +
-              ordered[1].y +
-              ordered[2].y +
-              ordered[3].y
-
-            ) / 4;
-
-
-          const normalizedX =
-            centerX /
-            video.videoWidth;
-
-
-          const normalizedY =
-            centerY /
-            video.videoHeight;
-
-
-          /*
-           * Center requirement.
-           */
-
-          if(
-            normalizedX < 0.25 ||
-            normalizedX > 0.75 ||
-            normalizedY < 0.15 ||
-            normalizedY > 0.85
-          ){
-
-            continue;
-
-          }
-
-
-          const areaRatio =
-            area /
-            frameArea;
-
-
-          if(
-            areaRatio < 0.10
-          ){
-
-            continue;
-
-          }
-
-
-          if(
-            !best ||
-            areaRatio >
-              best.areaRatio
-          ){
-
-            best = {
-
-              points:
-                ordered,
-
-              areaRatio:
-                areaRatio,
-
-              ratio:
-                ratio
-
-            };
-
-          }
-
-
-        }
-        finally{
-
-          approx.delete();
+          return max;
 
         }
 
-      }
-      finally{
 
-        contour.delete();
+        const topStrength =
+          localMaximum(
+            horizontalSmooth,
+            topY,
+            12
+          );
+
+
+        const bottomStrength =
+          localMaximum(
+            horizontalSmooth,
+            bottomY,
+            12
+          );
+
+
+        /*
+         * Vertical edge strength.
+         */
+
+        const leftStrength =
+          left.value;
+
+
+        const rightStrength =
+          right.value;
+
+
+        /*
+         * All four sides should have
+         * some meaningful edge signal.
+         */
+
+        if(
+          leftStrength <= 0 ||
+          rightStrength <= 0 ||
+          topStrength <= 0 ||
+          bottomStrength <= 0
+        ){
+
+          continue;
+
+        }
+
+
+        /*
+         * Center penalty.
+         */
+
+        const normalizedCenterY =
+          centerY /
+          scanHeight;
+
+
+        const centerPenalty =
+
+          Math.abs(
+            normalizedCenterX -
+            0.5
+          )
+
+          +
+
+          Math.abs(
+            normalizedCenterY -
+            0.5
+          );
+
+
+        /*
+         * Aspect penalty.
+         */
+
+        const actualRatio =
+          width /
+          expectedHeight;
+
+
+        const aspectDifference =
+          Math.abs(
+            actualRatio -
+            expectedRatio
+          );
+
+
+        /*
+         * Score the rectangle.
+         */
+
+        const score =
+
+          (
+            leftStrength +
+            rightStrength
+
+          )
+
+          +
+
+          (
+            topStrength +
+            bottomStrength
+          ) * 1.25
+
+          +
+
+          (
+            1 -
+            Math.min(
+              1,
+              aspectDifference /
+              expectedRatio
+            )
+          ) * 10
+
+          -
+
+          centerPenalty * 12;
+
+
+        if(
+          !best ||
+          score >
+            best.score
+        ){
+
+          best = {
+
+            score:
+              score,
+
+            left:
+              leftX,
+
+            right:
+              rightX,
+
+            top:
+              topY,
+
+            bottom:
+              bottomY
+
+          };
+
+        }
 
       }
 
     }
 
   }
-  finally{
 
-    src.delete();
 
-    gray.delete();
+  /*
+   * ========================================================
+   * REJECT WEAK DETECTIONS
+   * ========================================================
+   */
 
-    blur.delete();
+  if(
+    !best
+  ){
 
-    edges.delete();
-
-    contours.delete();
-
-    hierarchy.delete();
+    return null;
 
   }
 
 
-  return best;
+  /*
+   * ========================================================
+   * CONVERT BACK TO ORIGINAL CAMERA
+   * COORDINATES
+   * ========================================================
+   */
+
+  const scaleX =
+    video.videoWidth /
+    scanWidth;
+
+
+  const scaleY =
+    video.videoHeight /
+    scanHeight;
+
+
+  return {
+
+    points:[
+
+      {
+        x:
+          best.left *
+          scaleX,
+
+        y:
+          best.top *
+          scaleY
+
+      },
+
+      {
+        x:
+          best.right *
+          scaleX,
+
+        y:
+          best.top *
+          scaleY
+
+      },
+
+      {
+        x:
+          best.right *
+          scaleX,
+
+        y:
+          best.bottom *
+          scaleY
+
+      },
+
+      {
+        x:
+          best.left *
+          scaleX,
+
+        y:
+          best.bottom *
+          scaleY
+
+      }
+
+    ],
+
+
+    areaRatio:
+
+      (
+        (
+          best.right -
+          best.left
+        )
+
+        *
+
+        (
+          best.bottom -
+          best.top
+        )
+      )
+
+      /
+
+      (
+        scanWidth *
+        scanHeight
+      ),
+
+
+    ratio:
+
+      expectedRatio
+
+  };
 
 }
 
