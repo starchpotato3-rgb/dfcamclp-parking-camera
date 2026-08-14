@@ -131,16 +131,8 @@ canvas{
  */
 
 .id-guide{
-
-  position:absolute;
-
-  left:50%;
-
-  top:50%;
-
-  width:84%;
-
-  height:72%;
+  width:72%;
+  height:88%;
 
   transform:
     translate(-50%,-50%);
@@ -1166,20 +1158,35 @@ async function captureID(){
   }
 
 
-  const width =
-    video.videoWidth;
+const sourceWidth =
+  video.videoWidth;
 
+const sourceHeight =
+  video.videoHeight;
 
-  const height =
-    video.videoHeight;
+const targetHeight =
+  sourceWidth * 4 / 3;
 
+const cropHeight =
+  Math.min(
+    sourceHeight,
+    targetHeight
+  );
 
-  canvas.width =
-    width;
+const cropWidth =
+  cropHeight * 3 / 4;
 
+const sourceX =
+  (sourceWidth - cropWidth) / 2;
 
-  canvas.height =
-    height;
+const sourceY =
+  (sourceHeight - cropHeight) / 2;
+
+canvas.width =
+  cropWidth;
+
+canvas.height =
+  cropHeight;
 
 
   const ctx =
@@ -1188,13 +1195,23 @@ async function captureID(){
     );
 
 
-  ctx.drawImage(
-    video,
-    0,
-    0,
-    width,
-    height
-  );
+ ctx.drawImage(
+
+  video,
+
+  sourceX,
+  sourceY,
+
+  cropWidth,
+  cropHeight,
+
+  0,
+  0,
+
+  cropWidth,
+  cropHeight
+
+);
 
 
   capturedData =
