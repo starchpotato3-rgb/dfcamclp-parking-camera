@@ -651,7 +651,8 @@ function detectDocument(){
   if(
     !opencvReady ||
     !window.cv ||
-    !video.videoWidth
+    !video.videoWidth ||
+    !video.videoHeight
   ){
 
     return null;
@@ -663,8 +664,12 @@ function detectDocument(){
     window.cv;
 
 
+  /*
+   * Work on a smaller image for speed.
+   */
+
   const scanWidth =
-    320;
+    480;
 
 
   const scale =
@@ -679,21 +684,21 @@ function detectDocument(){
     );
 
 
-  const canvas =
+  const work =
     document.createElement(
       'canvas'
     );
 
 
-  canvas.width =
+  work.width =
     scanWidth;
 
-  canvas.height =
+  work.height =
     scanHeight;
 
 
   const ctx =
-    canvas.getContext(
+    work.getContext(
       '2d',
       {
         willReadFrequently:true
@@ -710,7 +715,7 @@ function detectDocument(){
   );
 
 
-  const data =
+  const imageData =
     ctx.getImageData(
       0,
       0,
@@ -721,21 +726,25 @@ function detectDocument(){
 
   const src =
     cv.matFromImageData(
-      data
+      imageData
     );
 
 
   const gray =
     new cv.Mat();
 
+
   const blur =
     new cv.Mat();
+
 
   const edges =
     new cv.Mat();
 
+
   const contours =
     new cv.MatVector();
+
 
   const hierarchy =
     new cv.Mat();
@@ -765,9 +774,38 @@ function detectDocument(){
     cv.Canny(
       blur,
       edges,
-      50,
-      150
+      40,
+      120
     );
+
+
+    /*
+     * Close small gaps in ID edges.
+     */
+
+    const kernel =
+      cv.Mat.ones(
+        3,
+        3,
+        cv.CV_8U
+      );
+
+
+    cv.dilate(
+      edges,
+      edges,
+      kernel
+    );
+
+
+    cv.erode(
+      edges,
+      edges,
+      kernel
+    );
+
+
+    kernel.delete();
 
 
     cv.findContours(
@@ -785,8 +823,8 @@ function detectDocument(){
 
 
     for(
-      let i=0;
-      i<contours.size();
+      let i = 0;
+      i < contours.size();
       i++
     ){
 
@@ -804,9 +842,13 @@ function detectDocument(){
           );
 
 
+        /*
+         * Ignore tiny objects.
+         */
+
         if(
           area <
-          frameArea * 0.08
+          frameArea * 0.05
         ){
 
           continue;
@@ -821,6 +863,15 @@ function detectDocument(){
           );
 
 
+        if(
+          perimeter <= 0
+        ){
+
+          continue;
+
+        }
+
+
         const approx =
           new cv.Mat();
 
@@ -830,13 +881,18 @@ function detectDocument(){
           cv.approxPolyDP(
             contour,
             approx,
-            perimeter*0.03,
+            perimeter * 0.035,
             true
           );
 
 
           let points = null;
 
+
+          /*
+           * First choice:
+           * four-corner contour.
+           */
 
           if(
             approx.rows === 4
@@ -846,8 +902,8 @@ function detectDocument(){
 
 
             for(
-              let j=0;
-              j<4;
+              let j = 0;
+              j < 4;
               j++
             ){
 
@@ -874,7 +930,7 @@ function detectDocument(){
 
             /*
              * Fallback:
-             * use minimum-area rectangle.
+             * minimum-area rectangle.
              */
 
             const rect =
@@ -884,18 +940,32 @@ function detectDocument(){
 
 
             const box =
-              cv.RotatedRect.points(
+              cv.boxPoints(
                 rect
               );
 
 
             points =
-              box.map(
-                p => ({
-                  x:p.x,
-                  y:p.y
-                })
-              );
+              [];
+
+
+            for(
+              let j = 0;
+              j < box.length;
+              j++
+            ){
+
+              points.push({
+
+                x:
+                  box[j].x,
+
+                y:
+                  box[j].y
+
+              });
+
+            }
 
           }
 
@@ -914,6 +984,10 @@ function detectDocument(){
 
           }
 
+
+          /*
+           * Width and height in SCAN coordinates.
+           */
 
           const width =
             (
@@ -944,8 +1018,8 @@ function detectDocument(){
 
 
           if(
-            width<=0 ||
-            height<=0
+            width <= 0 ||
+            height <= 0
           ){
 
             continue;
@@ -954,16 +1028,17 @@ function detectDocument(){
 
 
           const ratio =
-            width/height;
+            width /
+            height;
 
 
           /*
-           * Portrait ID.
+           * Portrait Student ID.
            */
 
           if(
-            ratio<0.35 ||
-            ratio>0.95
+            ratio < 0.35 ||
+            ratio > 0.95
           ){
 
             continue;
@@ -971,30 +1046,39 @@ function detectDocument(){
           }
 
 
+          /*
+           * IMPORTANT:
+           * These are SCAN coordinates.
+           * Compare center to scanWidth/scanHeight,
+           * NOT the full camera dimensions.
+           */
+
           const centerX =
             (
-              ordered[0].x+
-              ordered[1].x+
-              ordered[2].x+
+              ordered[0].x +
+              ordered[1].x +
+              ordered[2].x +
               ordered[3].x
-            )/4;
+            ) / 4;
 
 
           const centerY =
             (
-              ordered[0].y+
-              ordered[1].y+
-              ordered[2].y+
+              ordered[0].y +
+              ordered[1].y +
+              ordered[2].y +
               ordered[3].y
-            )/4;
+            ) / 4;
 
 
           const normalizedX =
-            centerX/scanWidth;
+            centerX /
+            scanWidth;
 
 
           const normalizedY =
-            centerY/scanHeight;
+            centerY /
+            scanHeight;
 
 
           /*
@@ -1002,10 +1086,10 @@ function detectDocument(){
            */
 
           if(
-            normalizedX<0.20 ||
-            normalizedX>0.80 ||
-            normalizedY<0.12 ||
-            normalizedY>0.88
+            normalizedX < 0.15 ||
+            normalizedX > 0.85 ||
+            normalizedY < 0.10 ||
+            normalizedY > 0.90
           ){
 
             continue;
@@ -1014,11 +1098,16 @@ function detectDocument(){
 
 
           const areaRatio =
-            area/frameArea;
+            area /
+            frameArea;
 
+
+          /*
+           * Ignore tiny documents.
+           */
 
           if(
-            areaRatio<0.08
+            areaRatio < 0.06
           ){
 
             continue;
@@ -1027,64 +1116,108 @@ function detectDocument(){
 
 
           /*
-           * Score candidate.
+           * Target Student ID ratio.
            */
+
+          const targetRatio =
+            54 / 85.6;
+
 
           const ratioError =
             Math.abs(
-              ratio-(54/85.6)
+              ratio -
+              targetRatio
             );
 
 
           const centerError =
             Math.hypot(
-              normalizedX-0.5,
-              normalizedY-0.5
+              normalizedX -
+              0.5,
+
+              normalizedY -
+              0.5
             );
 
 
+          /*
+           * Larger + more portrait +
+           * more centered = stronger match.
+           */
+
           const score =
 
-            areaRatio*100
+            areaRatio * 100
 
-            -
+            +
 
-            ratioError*20
+            Math.max(
+              0,
+              20 -
+              ratioError * 30
+            )
 
-            -
+            +
 
-            centerError*20;
+            Math.max(
+              0,
+              15 -
+              centerError * 25
+            );
 
 
           if(
             !best ||
-            score>best.score
+            score >
+            best.score
           ){
 
             const sx =
-              video.videoWidth/
+              video.videoWidth /
               scanWidth;
 
+
             const sy =
-              video.videoHeight/
+              video.videoHeight /
               scanHeight;
 
 
+            /*
+             * Convert the four detected
+             * corners back to full camera
+             * coordinates.
+             */
+
             best = {
 
-              score:score,
+              score:
+                score,
 
-              areaRatio:areaRatio,
+              areaRatio:
+                areaRatio,
+
+              ratio:
+                ratio,
 
               points:
                 ordered.map(
-                  p => ({
+                  function(
+                    point
+                  ){
 
-                    x:p.x*sx,
+                    return {
 
-                    y:p.y*sy
+                      x:
+                        point.x *
+                        sx,
 
-                  })
+                      y:
+                        point.y *
+                        sy
+
+                    };
+
+                  }
                 )
 
             };
@@ -1111,10 +1244,15 @@ function detectDocument(){
   finally{
 
     src.delete();
+
     gray.delete();
+
     blur.delete();
+
     edges.delete();
+
     contours.delete();
+
     hierarchy.delete();
 
   }
@@ -1123,7 +1261,6 @@ function detectDocument(){
   return best;
 
 }
-
 
 /* ==========================================================
    STABILITY
