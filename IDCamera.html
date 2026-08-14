@@ -12,6 +12,7 @@
 
   <title>Student ID Verification</title>
 
+
   <style>
 
     *{
@@ -58,12 +59,6 @@
     .muted{
       color:#667085;
     }
-
-    /*
-     * ==========================================================
-     * CAMERA
-     * ==========================================================
-     */
 
     .camera-wrap{
 
@@ -112,17 +107,12 @@
       display:none;
     }
 
-    /*
-     * ==========================================================
-     * CENTERED ID GUIDE
-     * ==========================================================
-     */
-
     .scanner-guide{
 
       position:absolute;
 
       left:50%;
+
       top:50%;
 
       width:68%;
@@ -154,9 +144,7 @@
     }
 
     .scanner-guide.ready{
-
       border-color:#22c55e;
-
     }
 
     .corner{
@@ -164,6 +152,7 @@
       position:absolute;
 
       width:28px;
+
       height:28px;
 
       border-color:white;
@@ -220,12 +209,6 @@
 
     }
 
-    /*
-     * ==========================================================
-     * INSTRUCTIONS
-     * ==========================================================
-     */
-
     .instruction{
 
       margin-top:10px;
@@ -245,12 +228,6 @@
       color:#667085;
 
     }
-
-    /*
-     * ==========================================================
-     * CHECKS
-     * ==========================================================
-     */
 
     .check-list{
 
@@ -288,6 +265,7 @@
     .check-icon{
 
       width:22px;
+
       height:22px;
 
       flex:0 0 auto;
@@ -325,12 +303,6 @@
       color:#991b1b;
 
     }
-
-    /*
-     * ==========================================================
-     * BUTTONS
-     * ==========================================================
-     */
 
     .actions{
 
@@ -383,12 +355,6 @@
       color:white;
 
     }
-
-    /*
-     * ==========================================================
-     * STATUS
-     * ==========================================================
-     */
 
     .status{
 
@@ -454,26 +420,20 @@
 
 <body>
 
-
 <div class="card">
-
 
   <h1>
     Student ID Verification
   </h1>
 
-
   <p class="muted">
-
-    Hold your physical Student ID in front of
-    the camera. The system will automatically
-    detect, align, and capture the card.
-
+    Hold your physical Student ID vertically
+    in front of the camera. The scanner will
+    automatically detect, align, and capture it.
   </p>
 
 
   <div class="camera-wrap">
-
 
     <video
       id="video"
@@ -509,7 +469,6 @@
 
     </div>
 
-
   </div>
 
 
@@ -522,27 +481,21 @@
 
 
   <div class="subinstruction">
-
-    Keep the ID vertical, centered,
-    clearly visible, and steady.
-
+    Keep the ID centered, vertical, flat,
+    and steady.
   </div>
 
 
   <div class="check-list">
 
-
     <div
       id="checkCard"
       class="check bad"
     >
-
       <span class="check-icon">!</span>
-
       <span>
         Physical Student ID detected
       </span>
-
     </div>
 
 
@@ -550,13 +503,10 @@
       id="checkPosition"
       class="check bad"
     >
-
       <span class="check-icon">!</span>
-
       <span>
         ID centered and upright
       </span>
-
     </div>
 
 
@@ -564,13 +514,10 @@
       id="checkSize"
       class="check bad"
     >
-
       <span class="check-icon">!</span>
-
       <span>
         ID large and clearly visible
       </span>
-
     </div>
 
 
@@ -578,13 +525,10 @@
       id="checkLighting"
       class="check bad"
     >
-
       <span class="check-icon">!</span>
-
       <span>
         Sufficient lighting
       </span>
-
     </div>
 
 
@@ -592,15 +536,11 @@
       id="checkFace"
       class="check bad"
     >
-
       <span class="check-icon">!</span>
-
       <span>
         Face visible on the ID
       </span>
-
     </div>
-
 
   </div>
 
@@ -646,37 +586,24 @@
     class="error"
   ></div>
 
-
 </div>
 
-
-<!-- ==========================================================
-     OCR
-     ========================================================== -->
 
 <script
   src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"
 ></script>
 
 
-<!-- ==========================================================
-     OPENCV
-     ========================================================== -->
-
 <script
-  async
   src="https://docs.opencv.org/4.x/opencv.js"
 ></script>
 
 
-<script>
-
+<script type="module">
 
 import {
-
   FilesetResolver,
   FaceLandmarker
-
 }
 from
 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304';
@@ -684,7 +611,7 @@ from
 
 /*
  * ==========================================================
- * GLOBAL STATE
+ * GLOBAL VARIABLES
  * ==========================================================
  */
 
@@ -764,19 +691,17 @@ const status =
  * ==========================================================
  */
 
-function showError(
-  message
-){
+function showError(message){
 
-  const el =
+  const element =
     document.getElementById(
       'error'
     );
 
-  el.textContent =
+  element.textContent =
     message;
 
-  el.style.display =
+  element.style.display =
     'block';
 
 }
@@ -784,15 +709,15 @@ function showError(
 
 function clearError(){
 
-  const el =
+  const element =
     document.getElementById(
       'error'
     );
 
-  el.textContent =
+  element.textContent =
     '';
 
-  el.style.display =
+  element.style.display =
     'none';
 
 }
@@ -818,20 +743,24 @@ function setCheck(
     return;
   }
 
+
   element.classList.toggle(
     'ok',
     ok
   );
+
 
   element.classList.toggle(
     'bad',
     !ok
   );
 
+
   const icon =
     element.querySelector(
       '.check-icon'
     );
+
 
   if(icon){
 
@@ -841,69 +770,6 @@ function setCheck(
         : '!';
 
   }
-
-}
-
-
-/*
- * ==========================================================
- * WAIT FOR OPENCV
- * ==========================================================
- */
-
-function waitForOpenCV(){
-
-  return new Promise(
-    function(resolve,reject){
-
-      const start =
-        Date.now();
-
-      const timer =
-        setInterval(
-          function(){
-
-            if(
-              window.cv &&
-              window.cv.Mat &&
-              window.cv.matFromImageData
-            ){
-
-              clearInterval(
-                timer
-              );
-
-              resolve();
-
-              return;
-
-            }
-
-
-            if(
-              Date.now() -
-              start >
-              12000
-            ){
-
-              clearInterval(
-                timer
-              );
-
-              reject(
-                new Error(
-                  'OpenCV did not load.'
-                )
-              );
-
-            }
-
-          },
-          200
-        );
-
-    }
-  );
 
 }
 
@@ -926,21 +792,21 @@ function checkLighting(){
   }
 
 
-  const c =
+  const temp =
     document.createElement(
       'canvas'
     );
 
 
-  c.width =
+  temp.width =
     40;
 
-  c.height =
+  temp.height =
     40;
 
 
-  const ctx =
-    c.getContext(
+  const context =
+    temp.getContext(
       '2d',
       {
         willReadFrequently:true
@@ -948,7 +814,7 @@ function checkLighting(){
     );
 
 
-  ctx.drawImage(
+  context.drawImage(
     video,
     0,
     0,
@@ -958,7 +824,7 @@ function checkLighting(){
 
 
   const pixels =
-    ctx.getImageData(
+    context.getImageData(
       0,
       0,
       40,
@@ -977,20 +843,10 @@ function checkLighting(){
   ){
 
     total +=
-
       (
-        0.299 *
-        pixels[i]
-
-        +
-
-        0.587 *
-        pixels[i + 1]
-
-        +
-
-        0.114 *
-        pixels[i + 2]
+        0.299 * pixels[i] +
+        0.587 * pixels[i + 1] +
+        0.114 * pixels[i + 2]
       );
 
   }
@@ -1010,10 +866,7 @@ function checkLighting(){
  * ==========================================================
  */
 
-function distance(
-  a,
-  b
-){
+function distance(a,b){
 
   return Math.sqrt(
 
@@ -1036,13 +889,11 @@ function distance(
 
 /*
  * ==========================================================
- * ORDER POINTS
+ * ORDER CORNERS
  * ==========================================================
  */
 
-function orderPoints(
-  points
-){
+function orderPoints(points){
 
   if(
     !points ||
@@ -1100,7 +951,7 @@ function orderPoints(
     );
 
 
-  const result = [
+  return [
 
     points[tl],
     points[tr],
@@ -1109,31 +960,6 @@ function orderPoints(
 
   ];
 
-
-  /*
-   * Make sure all points are unique.
-   */
-
-  const unique =
-    new Set(
-      result.map(
-        p =>
-          p.x + ':' + p.y
-      )
-    );
-
-
-  if(
-    unique.size !== 4
-  ){
-
-    return null;
-
-  }
-
-
-  return result;
-
 }
 
 
@@ -1141,9 +967,7 @@ function orderPoints(
  * ==========================================================
  * DOCUMENT DETECTION
  *
- * IMPORTANT:
- * This runs on a SMALL 320px-wide frame,
- * not the full camera resolution.
+ * Small 320px scan.
  * ==========================================================
  */
 
@@ -1194,7 +1018,7 @@ function detectDocument(){
     scanHeight;
 
 
-  const ctx =
+  const context =
     scanCanvas.getContext(
       '2d',
       {
@@ -1203,7 +1027,7 @@ function detectDocument(){
     );
 
 
-  ctx.drawImage(
+  context.drawImage(
 
     video,
 
@@ -1217,7 +1041,7 @@ function detectDocument(){
 
 
   const imageData =
-    ctx.getImageData(
+    context.getImageData(
       0,
       0,
       scanWidth,
@@ -1253,20 +1077,12 @@ function detectDocument(){
 
   try{
 
-    /*
-     * Grayscale.
-     */
-
     cv.cvtColor(
       src,
       gray,
       cv.COLOR_RGBA2GRAY
     );
 
-
-    /*
-     * Edge detection.
-     */
 
     cv.Canny(
       gray,
@@ -1275,10 +1091,6 @@ function detectDocument(){
       150
     );
 
-
-    /*
-     * Find outer contours.
-     */
 
     cv.findContours(
 
@@ -1319,10 +1131,6 @@ function detectDocument(){
             )
           );
 
-
-        /*
-         * Ignore small objects.
-         */
 
         if(
           area <
@@ -1480,7 +1288,7 @@ function detectDocument(){
 
 
           /*
-           * Vertical ID.
+           * Portrait only.
            */
 
           if(
@@ -1521,10 +1329,6 @@ function detectDocument(){
             video.videoHeight;
 
 
-          /*
-           * Center requirement.
-           */
-
           const centered =
             normalizedX >= 0.28 &&
             normalizedX <= 0.72 &&
@@ -1541,11 +1345,6 @@ function detectDocument(){
           }
 
 
-          /*
-           * Card must occupy enough
-           * of the frame.
-           */
-
           const areaRatio =
             area /
             frameArea;
@@ -1560,23 +1359,16 @@ function detectDocument(){
           }
 
 
-          const score =
-            areaRatio;
-
-
           if(
             !best ||
-            score >
-            best.score
+            areaRatio >
+            best.areaRatio
           ){
 
             best = {
 
               points:
                 ordered,
-
-              score:
-                score,
 
               areaRatio:
                 areaRatio,
@@ -1608,13 +1400,9 @@ function detectDocument(){
   finally{
 
     src.delete();
-
     gray.delete();
-
     edges.delete();
-
     contours.delete();
-
     hierarchy.delete();
 
   }
@@ -1631,9 +1419,7 @@ function detectDocument(){
  * ==========================================================
  */
 
-function updateStability(
-  card
-){
+function updateStability(card){
 
   if(
     !card
@@ -1665,9 +1451,7 @@ function updateStability(
   }
 
 
-  function center(
-    item
-  ){
+  function center(item){
 
     return {
 
@@ -1692,11 +1476,11 @@ function updateStability(
   }
 
 
-  const a =
+  const current =
     center(card);
 
 
-  const b =
+  const previous =
     center(lastCard);
 
 
@@ -1704,14 +1488,16 @@ function updateStability(
     Math.sqrt(
 
       Math.pow(
-        a.x - b.x,
+        current.x -
+        previous.x,
         2
       )
 
       +
 
       Math.pow(
-        a.y - b.y,
+        current.y -
+        previous.y,
         2
       )
 
@@ -1744,10 +1530,6 @@ function updateStability(
   lastCard =
     card;
 
-
-  /*
-   * Three good scans = stable.
-   */
 
   return (
     stableCount >= 3
@@ -1810,27 +1592,24 @@ function pointInPolygon(
       point.x <
 
       (
-        (
-          xj - xi
-        )
+        xj - xi
+      )
 
-        *
+      *
 
-        (
-          point.y - yi
-        )
+      (
+        point.y - yi
+      )
 
-        /
+      /
 
-        (
-          yj - yi
-        )
+      (
+        yj - yi
       )
 
       +
 
-      xi
-      );
+      xi;
 
 
     if(
@@ -1852,7 +1631,7 @@ function pointInPolygon(
 
 /*
  * ==========================================================
- * FACE MUST BE INSIDE THE PHYSICAL ID
+ * FACE INSIDE PHYSICAL CARD
  * ==========================================================
  */
 
@@ -1965,7 +1744,7 @@ function faceInsideCard(
 
 /*
  * ==========================================================
- * UPDATE UI
+ * UPDATE CHECKS
  * ==========================================================
  */
 
@@ -2115,9 +1894,6 @@ function updateUI(
 /*
  * ==========================================================
  * PERSPECTIVE CORRECTION
- *
- * OpenCV is used HERE ONLY,
- * ONCE, AFTER detection.
  * ==========================================================
  */
 
@@ -2213,13 +1989,13 @@ function correctPerspective(
     video.videoHeight;
 
 
-  const sourceContext =
+  const context =
     sourceCanvas.getContext(
       '2d'
     );
 
 
-  sourceContext.drawImage(
+  context.drawImage(
     video,
     0,
     0,
@@ -2229,7 +2005,7 @@ function correctPerspective(
 
 
   const imageData =
-    sourceContext.getImageData(
+    context.getImageData(
       0,
       0,
       sourceCanvas.width,
@@ -2301,7 +2077,7 @@ function correctPerspective(
     );
 
 
-  const matrix =
+  const transform =
     cv.getPerspectiveTransform(
       srcPoints,
       dstPoints
@@ -2314,7 +2090,7 @@ function correctPerspective(
 
     dst,
 
-    matrix,
+    transform,
 
     new cv.Size(
       outputWidth,
@@ -2324,42 +2100,38 @@ function correctPerspective(
   );
 
 
-  const outputCanvas =
+  const output =
     document.createElement(
       'canvas'
     );
 
 
-  outputCanvas.width =
+  output.width =
     outputWidth;
 
 
-  outputCanvas.height =
+  output.height =
     outputHeight;
 
 
   cv.imshow(
-    outputCanvas,
+    output,
     dst
   );
 
 
   const result =
-    outputCanvas.toDataURL(
+    output.toDataURL(
       'image/jpeg',
       0.94
     );
 
 
   src.delete();
-
   dst.delete();
-
   srcPoints.delete();
-
   dstPoints.delete();
-
-  matrix.delete();
+  transform.delete();
 
 
   return result;
@@ -2450,7 +2222,7 @@ async function autoCapture(
 
 
     showError(
-      'The ID could not be automatically captured. Please try again.'
+      'The ID could not be captured. Please try again.'
     );
 
 
@@ -2498,11 +2270,10 @@ function normalizeCompact(
 
   return normalizeText(
     text
-  )
-    .replace(
-      /\s/g,
-      ''
-    );
+  ).replace(
+    /\s/g,
+    ''
+  );
 
 }
 
@@ -2536,7 +2307,7 @@ async function verifyOCR(
     await worker.terminate();
 
 
-    const ocrText =
+    const normalized =
       normalizeText(
         text
       );
@@ -2566,11 +2337,6 @@ async function verifyOCR(
         );
 
 
-    /*
-     * Require most name components,
-     * allowing OCR to make one small error.
-     */
-
     let nameMatches =
       0;
 
@@ -2579,7 +2345,7 @@ async function verifyOCR(
       function(part){
 
         if(
-          ocrText.indexOf(
+          normalized.indexOf(
             part
           ) !== -1
         ){
@@ -2595,14 +2361,13 @@ async function verifyOCR(
     const nameOK =
       nameParts.length > 0 &&
 
-      (
-        nameMatches >=
-        Math.max(
-          1,
-          Math.ceil(
-            nameParts.length *
-            0.60
-          )
+      nameMatches >=
+
+      Math.max(
+        1,
+        Math.ceil(
+          nameParts.length *
+          0.60
         )
       );
 
@@ -2638,22 +2403,21 @@ async function verifyOCR(
     ){
 
       status.textContent =
-        'Student ID verified successfully. Please review the scanned image.';
+        'Student ID verified successfully. Review the scanned image.';
 
       useButton.style.display =
         'inline-block';
 
-      return;
+    }
+    else{
+
+      status.textContent =
+        'The ID was captured, but the expected name or Student ID could not be verified. Please retake.';
+
+      useButton.style.display =
+        'none';
 
     }
-
-
-    status.textContent =
-      'The ID was captured, but the expected name or Student ID could not be verified. Please retake.';
-
-    useButton.style.display =
-      'none';
-
 
   }
   catch(error){
@@ -2682,6 +2446,9 @@ async function retakeID(){
   clearError();
 
 
+  stopCamera();
+
+
   capturedData =
     null;
 
@@ -2696,6 +2463,10 @@ async function retakeID(){
 
   stableCount =
     0;
+
+
+  scanning =
+    false;
 
 
   useButton.style.display =
@@ -2718,9 +2489,11 @@ async function retakeID(){
     'block';
 
 
-  document.getElementById(
-    'ocrBox'
-  ).style.display =
+  document
+    .getElementById(
+      'ocrBox'
+    )
+    .style.display =
     'none';
 
 
@@ -2759,7 +2532,7 @@ async function retakeID(){
 
 
   instruction.textContent =
-    'Position your physical Student ID in the center guide.';
+    'Position your Student ID in the center.';
 
 
   await startCamera();
@@ -2791,16 +2564,15 @@ function useID(){
   }
 
 
-  const ocrBox =
+  const box =
     document.getElementById(
       'ocrBox'
     );
 
 
   const text =
-    ocrBox
-      .textContent ||
-      '';
+    box.textContent ||
+    '';
 
 
   const normalized =
@@ -2858,13 +2630,14 @@ function useID(){
     nameParts.length > 0 &&
 
     matches >=
-      Math.max(
-        1,
-        Math.ceil(
-          nameParts.length *
-          0.60
-        )
-      );
+
+    Math.max(
+      1,
+      Math.ceil(
+        nameParts.length *
+        0.60
+      )
+    );
 
 
   const idOK =
@@ -2932,7 +2705,7 @@ function useID(){
 
 /*
  * ==========================================================
- * CAMERA START
+ * START CAMERA
  * ==========================================================
  */
 
@@ -2957,13 +2730,11 @@ async function startCamera(){
               'environment',
 
             width:{
-              ideal:
-                640
+              ideal:640
             },
 
             height:{
-              ideal:
-                480
+              ideal:480
             }
 
           },
@@ -2990,12 +2761,13 @@ async function startCamera(){
   catch(error){
 
     console.error(
+      'Camera error:',
       error
     );
 
 
     showError(
-      'Camera access was denied or unavailable. Please allow camera permission and refresh the page.'
+      'Camera access was denied or unavailable. Please allow camera access and refresh this page.'
     );
 
   }
@@ -3005,13 +2777,12 @@ async function startCamera(){
 
 /*
  * ==========================================================
- * LIVE SCANNING
+ * SCANNING
  *
- * IMPORTANT:
- * setTimeout is used instead of a
- * requestAnimationFrame loop.
+ * Document detection runs every 350 ms.
  *
- * This prevents continuous CPU usage.
+ * MediaPipe only runs when a document
+ * is already detected.
  * ==========================================================
  */
 
@@ -3032,12 +2803,12 @@ function beginScanning(){
     false;
 
 
-  scheduleNextScan();
+  scheduleScan();
 
 }
 
 
-function scheduleNextScan(){
+function scheduleScan(){
 
   if(
     autoCaptured
@@ -3074,7 +2845,7 @@ async function scanFrame(){
     !video.videoHeight
   ){
 
-    scheduleNextScan();
+    scheduleScan();
 
     return;
 
@@ -3088,7 +2859,7 @@ async function scanFrame(){
   try{
 
     /*
-     * Detect card.
+     * Detect physical ID.
      */
 
     const card =
@@ -3099,7 +2870,7 @@ async function scanFrame(){
      * Lighting.
      */
 
-    const lighting =
+    const lightingOK =
       checkLighting();
 
 
@@ -3108,30 +2879,26 @@ async function scanFrame(){
 
 
     /*
-     * Only run MediaPipe AFTER
-     * a physical card has been found.
-     *
-     * This is a major performance fix.
+     * Only run MediaPipe if a physical
+     * document was actually found.
      */
-
-    const now =
-      performance.now();
-
 
     if(
       card &&
       faceLandmarker &&
-      now >= faceCheckTimer
+      performance.now() >=
+        faceCheckTimer
     ){
 
       faceCheckTimer =
-        now + 900;
+        performance.now() +
+        800;
 
 
       const result =
         faceLandmarker.detectForVideo(
           video,
-          now
+          performance.now()
         );
 
 
@@ -3156,8 +2923,7 @@ async function scanFrame(){
 
 
     /*
-     * If there is no card,
-     * never report a face as valid.
+     * No card = no valid face.
      */
 
     if(
@@ -3174,47 +2940,36 @@ async function scanFrame(){
      * Stability.
      */
 
-    let stable =
-      false;
-
-
-    if(
+    const stable =
       card
-    ){
-
-      stable =
-        updateStability(
-          card
-        );
-
-    }
-    else{
-
-      updateStability(
-        null
-      );
-
-    }
+        ? updateStability(card)
+        : updateStability(null);
 
 
     updateUI(
       card,
       faceOK,
-      lighting,
+      lightingOK,
       stable
     );
 
 
     /*
-     * AUTO CAPTURE
+     * Automatic capture.
      */
 
     if(
+
       card &&
+
       faceOK &&
-      lighting &&
+
+      lightingOK &&
+
       stable &&
+
       !autoCaptured
+
     ){
 
       await autoCapture(
@@ -3229,7 +2984,7 @@ async function scanFrame(){
   catch(error){
 
     console.error(
-      'Scanner frame error:',
+      'Scanner error:',
       error
     );
 
@@ -3242,61 +2997,7 @@ async function scanFrame(){
   }
 
 
-  scheduleNextScan();
-
-}
-
-
-/*
- * ==========================================================
- * STOP CAMERA
- * ==========================================================
- */
-
-function stopCamera(){
-
-  if(
-    scanTimer
-  ){
-
-    clearTimeout(
-      scanTimer
-    );
-
-    scanTimer =
-      null;
-
-  }
-
-
-  if(
-    stream
-  ){
-
-    stream
-      .getTracks()
-      .forEach(
-        function(track){
-
-          track.stop();
-
-        }
-      );
-
-    stream =
-      null;
-
-  }
-
-
-  if(
-    video
-  ){
-
-    video.srcObject =
-      null;
-
-  }
+  scheduleScan();
 
 }
 
@@ -3310,122 +3011,184 @@ function stopCamera(){
 async function initialize(){
 
   /*
-   * START CAMERA FIRST
+   * IMPORTANT:
+   *
+   * Camera starts FIRST.
+   * We do not wait for OpenCV or
+   * MediaPipe before opening it.
    */
 
-  try{
+  instruction.textContent =
+    'Starting camera...';
 
-    instruction.textContent =
-      'Starting camera...';
 
-    await startCamera();
-
-  }
-  catch(error){
-
-    console.error(
-      'Camera startup error:',
-      error
-    );
-
-    showError(
-      'Unable to start the camera. Please allow camera access and refresh the page.'
-    );
-
-    return;
-
-  }
+  await startCamera();
 
 
   /*
-   * LOAD OPENCV AFTER CAMERA IS ALREADY RUNNING
+   * OpenCV and MediaPipe load AFTER
+   * the camera is already visible.
    */
 
-  try{
+  setTimeout(
+    async function(){
 
-    instruction.textContent =
-      'Camera ready. Loading document scanner...';
+      try{
 
-    await waitForOpenCV();
-
-  }
-  catch(error){
-
-    console.error(
-      'OpenCV loading error:',
-      error
-    );
-
-    instruction.textContent =
-      'Camera ready. Document scanner is still loading...';
-
-  }
+        instruction.textContent =
+          'Camera ready. Loading document scanner...';
 
 
-  /*
-   * LOAD MEDIAPIPE AFTER CAMERA
-   */
+        /*
+         * OpenCV is already included
+         * as a normal script.
+         */
 
-  try{
-
-    instruction.textContent =
-      'Loading face verification...';
-
-
-    const vision =
-      await FilesetResolver.forVisionTasks(
-
-        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm'
-
-      );
+        const cvReady =
+          await waitForOpenCV();
 
 
-    faceLandmarker =
-      await FaceLandmarker.createFromOptions(
+        if(!cvReady){
 
-        vision,
-
-        {
-
-          baseOptions:{
-
-            modelAssetPath:
-              'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
-
-            delegate:
-              'GPU'
-
-          },
-
-          runningMode:
-            'VIDEO',
-
-          numFaces:
-            1,
-
-          outputFaceBlendshapes:
-            false
+          throw new Error(
+            'OpenCV failed to load.'
+          );
 
         }
 
-      );
+
+        instruction.textContent =
+          'Loading face verification...';
 
 
-    instruction.textContent =
-      'Scanner ready. Position your Student ID in the center.';
+        const vision =
+          await FilesetResolver.forVisionTasks(
 
-  }
-  catch(error){
+            'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm'
 
-    console.error(
-      'Face detection loading error:',
-      error
-    );
+          );
 
-    instruction.textContent =
-      'Camera ready. Position your Student ID in the center.';
 
-  }
+        faceLandmarker =
+          await FaceLandmarker.createFromOptions(
+
+            vision,
+
+            {
+
+              baseOptions:{
+
+                modelAssetPath:
+
+                  'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+
+                delegate:
+                  'GPU'
+
+              },
+
+              runningMode:
+                'VIDEO',
+
+              numFaces:
+                1,
+
+              outputFaceBlendshapes:
+                false
+
+            }
+
+          );
+
+
+        instruction.textContent =
+          'Scanner ready. Position your Student ID in the center.';
+
+      }
+      catch(error){
+
+        console.error(
+          'Scanner library error:',
+          error
+        );
+
+
+        /*
+         * Camera stays open.
+         */
+
+        instruction.textContent =
+          'Camera ready. Position your Student ID in the center.';
+
+      }
+
+    },
+    300
+  );
+
+}
+
+
+/*
+ * ==========================================================
+ * OPENCV WAIT
+ * ==========================================================
+ */
+
+function waitForOpenCV(){
+
+  return new Promise(
+    function(resolve){
+
+      const start =
+        Date.now();
+
+
+      const timer =
+        setInterval(
+          function(){
+
+            if(
+              window.cv &&
+              window.cv.Mat &&
+              window.cv.matFromImageData
+            ){
+
+              clearInterval(
+                timer
+              );
+
+              resolve(
+                true
+              );
+
+              return;
+
+            }
+
+
+            if(
+              Date.now() -
+              start >
+              15000
+            ){
+
+              clearInterval(
+                timer
+              );
+
+              resolve(
+                false
+              );
+
+            }
+
+          },
+          200
+        );
+
+    }
+  );
 
 }
 
@@ -3507,10 +3270,7 @@ window.addEventListener(
 
 /*
  * ==========================================================
- * INLINE BUTTON COMPATIBILITY
- *
- * The page uses a module script, so expose
- * these functions to onclick handlers.
+ * BUTTON FUNCTIONS
  * ==========================================================
  */
 
