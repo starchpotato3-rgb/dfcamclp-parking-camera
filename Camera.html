@@ -506,10 +506,33 @@ function updateChecks(){
   );
 
 
+  // ==========================================================
+  // ALL REQUIREMENTS MUST BE MET
+  // ==========================================================
+
+  const ready =
+    currentChecks.face &&
+    currentChecks.center &&
+    currentChecks.front &&
+    currentChecks.lighting &&
+    currentChecks.smile;
+
+
+  // Disable Take Photo until ALL requirements pass
+  takeButton.disabled =
+    !ready;
+
+
+  faceGuide.classList.toggle(
+    'ready',
+    ready
+  );
+
+
   if(!currentChecks.face){
 
     instruction.textContent =
-      'Place one face inside the guide.';
+      'Place exactly one face inside the guide.';
 
   }
 
@@ -537,19 +560,18 @@ function updateChecks(){
   else if(!currentChecks.smile){
 
     instruction.textContent =
-      'You may smile naturally, then take your photo.';
+      'Please smile naturally.';
 
   }
 
   else{
 
     instruction.textContent =
-      'Perfect! Hold still and take your photo.';
+      'Perfect! All requirements met. You may take your photo.';
 
   }
 
 }
-
 
 async function startCamera(){
 
