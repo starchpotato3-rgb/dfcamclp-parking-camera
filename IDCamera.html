@@ -437,7 +437,16 @@ button:disabled{
 
 <div class="check-list">
 
+<div
+  id="checkCard"
+  class="check bad"
+>
+  <span class="check-icon">!</span>
 
+  <span>
+    Physical Student ID detected
+  </span>
+</div>
   <div
     id="checkFace"
     class="check bad"
@@ -555,6 +564,10 @@ button:disabled{
 <script
   src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"
 ></script>
+  <script
+  async
+  src="https://docs.opencv.org/4.x/opencv.js"
+></script>
 
 
 <script type="module">
@@ -587,12 +600,10 @@ let expectedStudentId = '';
 
 let capturedData = null;
 
+let currentCardDetected = false;
 let currentFaceDetected = false;
-
 let currentLightingOK = false;
-
 let currentNameDetected = false;
-
 let currentIdDetected = false;
 
 
@@ -717,6 +728,12 @@ function setCheck(
 function updateLiveChecks(){
 
   setCheck(
+    'checkCard',
+    currentCardDetected
+  );
+
+
+  setCheck(
     'checkFace',
     currentFaceDetected
   );
@@ -729,23 +746,43 @@ function updateLiveChecks(){
 
 
   /*
-   * Capture is only available when
-   * the face and lighting are good.
+   * Capture is NOT allowed just because
+   * a face exists.
+   *
+   * The physical ID must also be detected.
    */
 
+  const ready =
+    currentCardDetected &&
+    currentFaceDetected &&
+    currentLightingOK;
+
+
   captureButton.disabled =
-    !(
-      currentFaceDetected &&
-      currentLightingOK
-    );
+    !ready;
+
+
+  idGuide.classList.toggle(
+    'ready',
+    ready
+  );
 
 
   if(
+    !currentCardDetected
+  ){
+
+    instruction.textContent =
+      'Place your physical Student ID vertically inside the guide.';
+
+  }
+
+  else if(
     !currentFaceDetected
   ){
 
     instruction.textContent =
-      'Make sure your face is visible on the Student ID.';
+      'Make sure the face printed on the Student ID is clearly visible.';
 
   }
 
@@ -754,14 +791,14 @@ function updateLiveChecks(){
   ){
 
     instruction.textContent =
-      'Move to a brighter area so the ID and face are clearly visible.';
+      'Move to a brighter area so the ID can be clearly read.';
 
   }
 
   else{
 
     instruction.textContent =
-      'Good. Keep the ID inside the guide and capture it.';
+      'Student ID detected. Keep it steady and capture the ID.';
 
   }
 
@@ -942,14 +979,245 @@ function getLighting(){
 
 }
 
+function detectStudentIDCard(){
 
-function processFace(
-  result
-){
+  if(
+    typeof cv === 'undefined' ||
+    !cv.Mat ||
+    !video.videoWidth
+  ){
+
+    return false;
+
+  }
+
+
+  const source =
+    new cv.Mat(
+      video.videoHeight,
+      video.videoWidth,
+      cv.CV_8UC4
+    );
+
+
+  const canvas =
+    document.createElement(
+      'canvas'
+    );
+
+
+  canvas.width =
+    video.videoWidth;
+
+  canvas.height =
+    video.videoHeight;
+
+
+  const ctx =
+    canvas.getContext('2d');
+
+  ctx.drawImage(
+    video,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+
+  const imageData =
+    ctx.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+
+  source.data.set(
+    imageData.data
+  );
+
+
+  const gray =
+    new cv.Mat();
+
+
+  const blurred =
+    new cv.Mat();
+
+
+  const edges =
+    new cv.Mat();
+
+
+  const contours =
+    new cv.MatVector();
+
+
+  const hierarchy =
+    new cv.Mat();
+
+
+  try{
+
+    cv.cvtColor(
+      source,
+      gray,
+      cv.COLOR_RGBA2GRAY
+    );
+
+
+    cv.GaussianBlur(
+      gray,
+      blurred,
+      new cv.Size(5,5),
+      0
+    );
+
+
+    cv.Canny(
+      blurred,
+      edges,
+      50,
+      150
+    );
+
+
+    cv.findContours(
+      edges,
+      contours,
+      hierarchy,
+      cv.RETR_EXTERNAL,
+      cv.CHAIN_APPROX_SIMPLE
+    );
+
+
+    const frameArea =
+      video.videoWidth *
+      video.videoHeight;
+
+
+    let bestArea =
+      0;
+
+
+    let bestRatio =
+      0;
+
+
+    for(
+      let i = 0;
+      i < contours.size();
+      i++
+    ){
+
+      const contour =
+        contours.get(i);
+
+
+      const perimeter =
+        cv.arcLength(
+          contour,
+          true
+        );
+
+
+      const approx =
+        new cv.Mat();
+
+
+      cv.approxPolyDP(
+        contour,
+        approx,
+        0.03 * perimeter,
+        true
+      );
+
+
+      if(
+        approx.rows === 4
+      ){
+
+        const rect =
+          cv.boundingRect(
+            approx
+          );
+
+
+        const area =
+          rect.width *
+          rect.height;
+
+
+        const ratio =
+          rect.width /
+          rect.height;
+
+
+        /*
+         * We specifically want a
+         * portrait/vertical card.
+         */
+
+        const verticalCard =
+          ratio >= 0.45 &&
+          ratio <= 0.85;
+
+
+        const largeEnough =
+          area >
+          frameArea * 0.12;
+
+
+        if(
+          verticalCard &&
+          largeEnough &&
+          area > bestArea
+        ){
+
+          bestArea =
+            area;
+
+          bestRatio =
+            ratio;
+
+        }
+
+      }
+
+
+      approx.delete();
+
+      contour.delete();
+
+    }
+
+
+    return (
+      bestArea >
+      frameArea * 0.12 &&
+      bestRatio >= 0.45 &&
+      bestRatio <= 0.85
+    );
+
+  }
+  finally{
+
+    source.delete();
+    gray.delete();
+    blurred.delete();
+    edges.delete();
+    contours.delete();
+    hierarchy.delete();
+
+  }
+
+}
+function processFrame(result){
 
   const faces =
-    result.faceLandmarks ||
-    [];
+    result.faceLandmarks || [];
 
 
   currentFaceDetected =
@@ -958,6 +1226,111 @@ function processFace(
 
   currentLightingOK =
     getLighting();
+
+
+  /*
+   * Detect the actual physical ID card.
+   */
+
+  currentCardDetected =
+    detectStudentIDCard();
+function faceIsInsideCard(
+  landmarks
+){
+
+  if(
+    !landmarks ||
+    !landmarks.length
+  ){
+
+    return false;
+
+  }
+
+
+  /*
+   * Face center.
+   */
+
+  let totalX = 0;
+  let totalY = 0;
+
+
+  landmarks.forEach(
+    function(point){
+
+      totalX +=
+        point.x;
+
+      totalY +=
+        point.y;
+
+    }
+  );
+
+
+  const faceX =
+    totalX /
+    landmarks.length;
+
+
+  const faceY =
+    totalY /
+    landmarks.length;
+
+
+  /*
+   * Approximate card location.
+   *
+   * This assumes the vertical ID is
+   * held near the center of the
+   * camera frame, matching the guide.
+   */
+
+  const cardLeft =
+    0.20;
+
+  const cardRight =
+    0.80;
+
+  const cardTop =
+    0.08;
+
+  const cardBottom =
+    0.92;
+
+
+  return (
+    faceX >= cardLeft &&
+    faceX <= cardRight &&
+    faceY >= cardTop &&
+    faceY <= cardBottom
+  );
+
+}
+
+  /*
+   * A face only counts if there is
+   * also a detected ID card.
+   */
+
+  if(
+    currentCardDetected &&
+    currentFaceDetected
+  ){
+
+    currentFaceDetected =
+      faceIsInsideCard(
+        faces[0]
+      );
+
+  }
+  else{
+
+    currentFaceDetected =
+      false;
+
+  }
 
 
   updateLiveChecks();
@@ -1124,9 +1497,9 @@ function detect(){
       );
 
 
-    processFace(
-      result
-    );
+    processFrame(
+  result
+);
 
   }
 
