@@ -669,7 +669,7 @@
 ></script>
 
 
-<script type="module">
+<script>
 
 
 import {
@@ -3309,13 +3309,67 @@ function stopCamera(){
 
 async function initialize(){
 
+  /*
+   * START CAMERA FIRST
+   */
+
   try{
 
     instruction.textContent =
-      'Loading document scanner...';
+      'Starting camera...';
 
+    await startCamera();
+
+  }
+  catch(error){
+
+    console.error(
+      'Camera startup error:',
+      error
+    );
+
+    showError(
+      'Unable to start the camera. Please allow camera access and refresh the page.'
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * LOAD OPENCV AFTER CAMERA IS ALREADY RUNNING
+   */
+
+  try{
+
+    instruction.textContent =
+      'Camera ready. Loading document scanner...';
 
     await waitForOpenCV();
+
+  }
+  catch(error){
+
+    console.error(
+      'OpenCV loading error:',
+      error
+    );
+
+    instruction.textContent =
+      'Camera ready. Document scanner is still loading...';
+
+  }
+
+
+  /*
+   * LOAD MEDIAPIPE AFTER CAMERA
+   */
+
+  try{
+
+    instruction.textContent =
+      'Loading face verification...';
 
 
     const vision =
@@ -3336,7 +3390,6 @@ async function initialize(){
           baseOptions:{
 
             modelAssetPath:
-
               'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
 
             delegate:
@@ -3358,19 +3411,19 @@ async function initialize(){
       );
 
 
-    await startCamera();
+    instruction.textContent =
+      'Scanner ready. Position your Student ID in the center.';
 
   }
   catch(error){
 
     console.error(
+      'Face detection loading error:',
       error
     );
 
-
-    showError(
-      'The Student ID scanner could not be initialized. Please refresh the page.'
-    );
+    instruction.textContent =
+      'Camera ready. Position your Student ID in the center.';
 
   }
 
