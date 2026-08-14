@@ -3,443 +3,428 @@
 
 <head>
 
-<meta charset="UTF-8">
+  <meta charset="UTF-8">
 
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1"
->
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
 
-<title>
-  Student ID Verification
-</title>
+  <title>
+    Student ID Scanner
+  </title>
 
 
-<style>
+  <style>
 
-*{
-  box-sizing:border-box;
-}
+    *{
+      box-sizing:border-box;
+    }
 
-body{
-  margin:0;
-  min-height:100vh;
-  padding:18px;
 
-  background:#f4f7fb;
+    body{
 
-  font-family:Arial,sans-serif;
+      margin:0;
 
-  color:#172033;
+      min-height:100vh;
 
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
+      padding:18px;
 
-.card{
-  width:100%;
-  max-width:620px;
+      background:#f4f7fb;
 
-  background:#fff;
+      font-family:Arial,sans-serif;
 
-  border-radius:20px;
+      color:#172033;
 
-  padding:20px;
+      display:flex;
 
-  box-shadow:
-    0 10px 35px
-    rgba(0,0,0,.12);
+      align-items:center;
 
-  text-align:center;
-}
+      justify-content:center;
 
-h1{
-  margin:0 0 8px;
-}
+    }
 
-.muted{
-  color:#667085;
-}
 
+    .card{
 
-/* CAMERA */
+      width:100%;
 
-.camera-wrap{
+      max-width:620px;
 
-  width:100%;
+      background:#fff;
 
-  max-width:420px;
+      border-radius:20px;
 
-  aspect-ratio:3 / 4;
+      padding:20px;
 
-  margin:20px auto;
+      box-shadow:
+        0 10px 35px
+        rgba(0,0,0,.12);
 
-  position:relative;
+      text-align:center;
 
-  overflow:hidden;
+    }
 
-  border-radius:18px;
 
-  background:#111827;
-}
+    h1{
 
+      margin:
+        0 0 8px;
 
-video,
-#capturedImage{
+    }
 
-  position:absolute;
 
-  inset:0;
+    .muted{
 
-  width:100%;
+      color:#667085;
 
-  height:100%;
+      font-size:14px;
 
-  object-fit:cover;
+      line-height:1.4;
 
-}
+    }
 
-video{
-  display:block;
-}
 
-#capturedImage{
-  display:none;
-}
+    /*
+     * ==========================================================
+     * CAMERA
+     * ==========================================================
+     */
 
-#canvas,
-#workCanvas{
-  display:none;
-}
+    .camera-wrap{
 
+      position:relative;
 
-/* CENTER GUIDE */
+      width:100%;
 
-.scanner-guide{
+      max-width:420px;
 
-  position:absolute;
+      aspect-ratio:3 / 4;
 
-  left:50%;
-  top:50%;
+      margin:20px auto;
 
-  width:68%;
+      overflow:hidden;
 
-  aspect-ratio:3 / 4;
+      border-radius:18px;
 
-  transform:
-    translate(-50%,-50%);
+      background:#111827;
 
-  border:
-    3px solid rgba(
-      255,
-      255,
-      255,
-      .95
-    );
+    }
 
-  border-radius:16px;
 
-  pointer-events:none;
+    #video{
 
-  box-shadow:
-    0 0 0 9999px
-    rgba(0,0,0,.30);
+      position:absolute;
 
-  transition:
-    border-color .2s ease;
+      inset:0;
 
-}
+      width:100%;
 
-.scanner-guide.ready{
-  border-color:#22c55e;
-}
+      height:100%;
 
+      object-fit:cover;
 
-/* CORNERS */
+      display:block;
 
-.corner{
+    }
 
-  position:absolute;
 
-  width:28px;
-  height:28px;
+    #capturedImage{
 
-  border-color:white;
+      position:absolute;
 
-  border-style:solid;
+      inset:0;
 
-}
+      width:100%;
 
-.corner.tl{
+      height:100%;
 
-  top:-2px;
-  left:-2px;
+      object-fit:contain;
 
-  border-width:
-    4px 0 0 4px;
+      background:#111827;
 
-  border-radius:
-    8px 0 0 0;
+      display:none;
 
-}
+    }
 
-.corner.tr{
 
-  top:-2px;
-  right:-2px;
+    /*
+     * Scanner guide
+     *
+     * This is ONLY a guide.
+     * Actual crop comes from detected
+     * document boundaries.
+     */
 
-  border-width:
-    4px 4px 0 0;
+    .scanner-guide{
 
-  border-radius:
-    0 8px 0 0;
+      position:absolute;
 
-}
+      left:50%;
 
-.corner.bl{
+      top:50%;
 
-  bottom:-2px;
-  left:-2px;
+      width:70%;
 
-  border-width:
-    0 0 4px 4px;
+      aspect-ratio:3 / 4;
 
-  border-radius:
-    0 0 0 8px;
+      transform:
+        translate(-50%,-50%);
 
-}
+      border:
 
-.corner.br{
+        3px solid
 
-  bottom:-2px;
-  right:-2px;
+        rgba(
+          255,
+          255,
+          255,
+          .95
+        );
 
-  border-width:
-    0 4px 4px 0;
+      border-radius:14px;
 
-  border-radius:
-    0 0 8px 0;
+      pointer-events:none;
 
-}
+      box-shadow:
 
+        0 0 0 9999px
 
-/* TEXT */
+        rgba(
+          0,
+          0,
+          0,
+          .30
+        );
 
-.instruction{
+      transition:
+        border-color .2s ease;
 
-  margin-top:10px;
+    }
 
-  font-size:15px;
 
-  font-weight:800;
+    .scanner-guide.detected{
 
-}
+      border-color:
+        #22c55e;
 
-.subinstruction{
+    }
 
-  margin-top:7px;
 
-  font-size:13px;
+    .corner{
 
-  color:#667085;
+      position:absolute;
 
-}
+      width:26px;
 
+      height:26px;
 
-/* CHECKS */
+      border:
 
-.check-list{
+        4px solid white;
 
-  display:grid;
+    }
 
-  gap:8px;
 
-  margin:16px 0;
+    .corner.tl{
 
-  padding:14px;
+      top:-3px;
 
-  text-align:left;
+      left:-3px;
 
-  background:#f8fafc;
+      border-right:0;
 
-  border:
-    1px solid #e5e7eb;
+      border-bottom:0;
 
-  border-radius:14px;
+      border-radius:
+        8px 0 0 0;
 
-}
+    }
 
-.check{
 
-  display:flex;
+    .corner.tr{
 
-  align-items:center;
+      top:-3px;
 
-  gap:9px;
+      right:-3px;
 
-  font-size:14px;
+      border-left:0;
 
-}
+      border-bottom:0;
 
-.check-icon{
+      border-radius:
+        0 8px 0 0;
 
-  width:22px;
+    }
 
-  height:22px;
 
-  flex:0 0 auto;
+    .corner.bl{
 
-  border-radius:50%;
+      bottom:-3px;
 
-  display:flex;
+      left:-3px;
 
-  align-items:center;
+      border-right:0;
 
-  justify-content:center;
+      border-top:0;
 
-  background:#e5e7eb;
+      border-radius:
+        0 0 0 8px;
 
-  color:#667085;
+    }
 
-  font-size:12px;
 
-  font-weight:800;
+    .corner.br{
 
-}
+      bottom:-3px;
 
-.check.ok .check-icon{
+      right:-3px;
 
-  background:#dcfce7;
+      border-left:0;
 
-  color:#166534;
+      border-top:0;
 
-}
+      border-radius:
+        0 0 8px 0;
 
-.check.bad .check-icon{
+    }
 
-  background:#fee2e2;
 
-  color:#991b1b;
+    /*
+     * ==========================================================
+     * STATUS
+     * ==========================================================
+     */
 
-}
+    .instruction{
 
+      font-weight:800;
 
-/* BUTTONS */
+      font-size:15px;
 
-.actions{
+      margin-top:10px;
 
-  display:flex;
+    }
 
-  justify-content:center;
 
-  gap:10px;
+    .status{
 
-  flex-wrap:wrap;
+      margin-top:8px;
 
-}
+      min-height:20px;
 
-button{
+      font-size:13px;
 
-  border:0;
+      color:#667085;
 
-  border-radius:10px;
+    }
 
-  padding:13px 20px;
 
-  font-size:15px;
+    .error{
 
-  font-weight:800;
+      display:none;
 
-  cursor:pointer;
+      margin-top:14px;
 
-}
+      padding:12px;
 
-button:disabled{
+      border-radius:10px;
 
-  opacity:.45;
+      background:#fee2e2;
 
-  cursor:not-allowed;
+      color:#991b1b;
 
-}
+      font-size:14px;
 
-.secondary{
+    }
 
-  background:#e5e7eb;
 
-  color:#172033;
+    /*
+     * ==========================================================
+     * BUTTONS
+     * ==========================================================
+     */
 
-}
+    .actions{
 
-.success{
+      display:flex;
 
-  background:#15803d;
+      justify-content:center;
 
-  color:#fff;
+      gap:10px;
 
-}
+      flex-wrap:wrap;
 
+      margin-top:16px;
 
-/* STATUS */
+    }
 
-.status{
 
-  margin-top:12px;
+    button{
 
-  min-height:20px;
+      border:0;
 
-  font-size:13px;
+      border-radius:10px;
 
-  color:#667085;
+      padding:
 
-}
+        12px 18px;
 
-.error{
+      font-size:15px;
 
-  display:none;
+      font-weight:800;
 
-  margin-top:14px;
+      cursor:pointer;
 
-  padding:12px;
+    }
 
-  border-radius:10px;
 
-  background:#fee2e2;
+    .secondary{
 
-  color:#991b1b;
+      background:#e5e7eb;
 
-  font-size:14px;
+      color:#172033;
 
-}
+    }
 
-.ocr-box{
 
-  display:none;
+    .success{
 
-  margin-top:15px;
+      background:#15803d;
 
-  padding:12px;
+      color:white;
 
-  text-align:left;
+    }
 
-  background:#f8fafc;
 
-  border:
-    1px solid #e5e7eb;
+    button:disabled{
 
-  border-radius:10px;
+      opacity:.45;
 
-  font-size:12px;
+      cursor:not-allowed;
 
-  max-height:130px;
+    }
 
-  overflow:auto;
 
-  white-space:pre-wrap;
+    /*
+     * ==========================================================
+     * RESULT
+     * ==========================================================
+     */
 
-}
+    .result-label{
 
-</style>
+      display:none;
+
+      margin-top:14px;
+
+      font-weight:800;
+
+      color:#166534;
+
+    }
+
+  </style>
 
 </head>
 
@@ -450,247 +435,116 @@ button:disabled{
 <div class="card">
 
 
-<h1>
-  Student ID Verification
-</h1>
+  <h1>
+    Student ID Scanner
+  </h1>
 
 
-<p class="muted">
+  <p class="muted">
 
-  Hold your physical Student ID vertically
-  in front of the camera. The scanner will
-  automatically detect, align, and capture it.
+    Hold your physical Student ID vertically
+    in the center. The scanner will automatically
+    detect the card and capture it.
 
-</p>
-
-
-<div class="camera-wrap">
+  </p>
 
 
-  <video
-    id="video"
-    autoplay
-    playsinline
-    muted
-  ></video>
+  <div class="camera-wrap">
 
 
-  <canvas
-    id="canvas"
-  ></canvas>
+    <video
+      id="video"
+      autoplay
+      playsinline
+      muted
+    ></video>
 
 
-  <canvas
-    id="workCanvas"
-  ></canvas>
+    <img
+      id="capturedImage"
+      alt="Scanned Student ID"
+    >
 
 
-  <img
-    id="capturedImage"
-    alt="Captured Student ID"
-  >
+    <div
+      id="scannerGuide"
+      class="scanner-guide"
+    >
 
+      <span
+        class="corner tl"
+      ></span>
 
-  <div
-    id="scannerGuide"
-    class="scanner-guide"
-  >
+      <span
+        class="corner tr"
+      ></span>
 
-    <span
-      class="corner tl"
-    ></span>
+      <span
+        class="corner bl"
+      ></span>
 
-    <span
-      class="corner tr"
-    ></span>
+      <span
+        class="corner br"
+      ></span>
 
-    <span
-      class="corner bl"
-    ></span>
-
-    <span
-      class="corner br"
-    ></span>
-
-  </div>
-
-</div>
-
-
-<div
-  id="instruction"
-  class="instruction"
->
-  Starting camera...
-</div>
-
-
-<div class="subinstruction">
-
-  Keep the ID centered, vertical,
-  flat, and steady.
-
-</div>
-
-
-<div class="check-list">
-
-
-  <div
-    id="checkCard"
-    class="check bad"
-  >
-
-    <span class="check-icon">
-      !
-    </span>
-
-    <span>
-      Physical Student ID detected
-    </span>
+    </div>
 
   </div>
 
 
   <div
-    id="checkPosition"
-    class="check bad"
+    id="instruction"
+    class="instruction"
   >
+    Starting camera...
+  </div>
 
-    <span class="check-icon">
-      !
-    </span>
 
-    <span>
-      ID centered and upright
-    </span>
+  <div
+    id="status"
+    class="status"
+  >
+    Position your ID inside the guide.
+  </div>
+
+
+  <div
+    id="resultLabel"
+    class="result-label"
+  >
+    ✓ Student ID captured. Review the scan.
+  </div>
+
+
+  <div class="actions">
+
+
+    <button
+      id="retakeButton"
+      class="secondary"
+      style="display:none;"
+      onclick="retakeScan()"
+    >
+      Retake
+    </button>
+
+
+    <button
+      id="useButton"
+      class="success"
+      style="display:none;"
+      onclick="useScan()"
+    >
+      Use This ID
+    </button>
 
   </div>
 
 
   <div
-    id="checkSize"
-    class="check bad"
-  >
-
-    <span class="check-icon">
-      !
-    </span>
-
-    <span>
-      ID large and clearly visible
-    </span>
-
-  </div>
-
-
-  <div
-    id="checkLighting"
-    class="check bad"
-  >
-
-    <span class="check-icon">
-      !
-    </span>
-
-    <span>
-      Sufficient lighting
-    </span>
-
-  </div>
-
-
-  <div
-    id="checkFace"
-    class="check bad"
-  >
-
-    <span class="check-icon">
-      !
-    </span>
-
-    <span>
-      Face visible on the ID
-    </span>
-
-  </div>
-
-
-  <div
-    id="checkName"
-    class="check bad"
-  >
-
-    <span class="check-icon">
-      !
-    </span>
-
-    <span>
-      Student name detected
-    </span>
-
-  </div>
-
-
-  <div
-    id="checkId"
-    class="check bad"
-  >
-
-    <span class="check-icon">
-      !
-    </span>
-
-    <span>
-      Student ID number detected
-    </span>
-
-  </div>
-
-</div>
-
-
-<div class="actions">
-
-
-  <button
-    id="retakeButton"
-    class="secondary"
-    style="display:none"
-    onclick="retakeID()"
-  >
-    Retake
-  </button>
-
-
-  <button
-    id="useButton"
-    class="success"
-    style="display:none"
-    onclick="useID()"
-  >
-    Use This ID
-  </button>
-
-</div>
-
-
-<div
-  id="status"
-  class="status"
-></div>
-
-
-<div
-  id="ocrBox"
-  class="ocr-box"
-></div>
-
-
-<div
-  id="error"
-  class="error"
-></div>
+    id="error"
+    class="error"
+  ></div>
 
 
 </div>
@@ -698,53 +552,38 @@ button:disabled{
 
 <script>
 
-
-/* ==========================================================
-   GLOBAL VARIABLES
-   ========================================================== */
+/*
+ * ==========================================================
+ * GLOBALS
+ * ==========================================================
+ */
 
 let stream = null;
 
-let faceLandmarker = null;
-
-let capturedData = null;
-
-let expectedName = '';
-
-let expectedStudentId = '';
-
-let scanTimer = null;
+let cvReady = false;
 
 let scanning = false;
 
+let scanTimer = null;
+
+let lastDetection = null;
+
+let stableFrames = 0;
+
 let autoCaptured = false;
 
-let lastCard = null;
+let capturedData = null;
 
-let stableCount = 0;
 
-let faceLibraryReady = false;
-
-let cvReady = false;
-
-let tesseractReady = false;
-
+/*
+ * ==========================================================
+ * ELEMENTS
+ * ==========================================================
+ */
 
 const video =
   document.getElementById(
     'video'
-  );
-
-
-const canvas =
-  document.getElementById(
-    'canvas'
-  );
-
-
-const workCanvas =
-  document.getElementById(
-    'workCanvas'
   );
 
 
@@ -784,21 +623,32 @@ const status =
   );
 
 
-/* ==========================================================
-   ERROR
-   ========================================================== */
+const errorBox =
+  document.getElementById(
+    'error'
+  );
 
-function showError(message){
 
-  const e =
-    document.getElementById(
-      'error'
-    );
+const resultLabel =
+  document.getElementById(
+    'resultLabel'
+  );
 
-  e.textContent =
+
+/*
+ * ==========================================================
+ * ERROR
+ * ==========================================================
+ */
+
+function showError(
+  message
+){
+
+  errorBox.textContent =
     message;
 
-  e.style.display =
+  errorBox.style.display =
     'block';
 
 }
@@ -806,91 +656,47 @@ function showError(message){
 
 function clearError(){
 
-  const e =
-    document.getElementById(
-      'error'
-    );
-
-  e.textContent =
+  errorBox.textContent =
     '';
 
-  e.style.display =
+  errorBox.style.display =
     'none';
 
 }
 
 
-/* ==========================================================
-   CHECK UI
-   ========================================================== */
+/*
+ * ==========================================================
+ * DYNAMIC OPENCV LOADER
+ *
+ * IMPORTANT:
+ * Camera starts BEFORE this loads.
+ * ==========================================================
+ */
 
-function setCheck(
-  id,
-  ok
-){
-
-  const e =
-    document.getElementById(
-      id
-    );
-
-  if(!e){
-    return;
-  }
-
-  e.classList.toggle(
-    'ok',
-    ok
-  );
-
-  e.classList.toggle(
-    'bad',
-    !ok
-  );
-
-
-  const icon =
-    e.querySelector(
-      '.check-icon'
-    );
-
-
-  if(icon){
-
-    icon.textContent =
-      ok
-        ? '✓'
-        : '!';
-
-  }
-
-}
-
-
-/* ==========================================================
-   DYNAMIC SCRIPT LOADER
-   ========================================================== */
-
-function loadScript(
-  src,
-  readyCheck,
-  timeoutMs = 30000
-){
-
-  if(
-    readyCheck()
-  ){
-
-    return Promise.resolve();
-
-  }
-
+function loadOpenCV(){
 
   return new Promise(
     function(
       resolve,
       reject
     ){
+
+      if(
+        window.cv &&
+        window.cv.Mat &&
+        window.cv.matFromImageData
+      ){
+
+        cvReady =
+          true;
+
+        resolve();
+
+        return;
+
+      }
+
 
       const script =
         document.createElement(
@@ -899,7 +705,7 @@ function loadScript(
 
 
       script.src =
-        src;
+        'https://docs.opencv.org/4.x/opencv.js';
 
 
       script.async =
@@ -910,8 +716,118 @@ function loadScript(
         false;
 
 
-      const finish =
-        function(error){
+      const timeout =
+        setTimeout(
+          function(){
+
+            if(
+              finished
+            ){
+
+              return;
+
+            }
+
+
+            finished =
+              true;
+
+
+            reject(
+              new Error(
+                'OpenCV loading timed out.'
+              )
+            );
+
+          },
+          20000
+        );
+
+
+      script.onload =
+        function(){
+
+          const start =
+            Date.now();
+
+
+          const check =
+            setInterval(
+              function(){
+
+                if(
+                  window.cv &&
+                  window.cv.Mat &&
+                  window.cv.matFromImageData
+                ){
+
+                  clearInterval(
+                    check
+                  );
+
+                  clearTimeout(
+                    timeout
+                  );
+
+
+                  if(
+                    !finished
+                  ){
+
+                    finished =
+                      true;
+
+                    cvReady =
+                      true;
+
+                    resolve();
+
+                  }
+
+                }
+
+
+                if(
+                  Date.now() -
+                  start >
+                  18000
+                ){
+
+                  clearInterval(
+                    check
+                  );
+
+                  clearTimeout(
+                    timeout
+                  );
+
+
+                  if(
+                    !finished
+                  ){
+
+                    finished =
+                      true;
+
+                    reject(
+                      new Error(
+                        'OpenCV failed to initialize.'
+                      )
+                    );
+
+                  }
+
+                }
+
+              },
+              100
+            );
+
+        };
+
+
+      script.onerror =
+        function(){
 
           if(
             finished
@@ -926,38 +842,14 @@ function loadScript(
             true;
 
 
-          clearInterval(
-            poll
-          );
-
-
           clearTimeout(
             timeout
           );
 
 
-          if(error){
-
-            reject(
-              error
-            );
-
-          }
-          else{
-
-            resolve();
-
-          }
-
-        };
-
-
-      script.onerror =
-        function(){
-
-          finish(
+          reject(
             new Error(
-              'Unable to load external scanner library.'
+              'Unable to load OpenCV.'
             )
           );
 
@@ -968,299 +860,17 @@ function loadScript(
         script
       );
 
-
-      const poll =
-        setInterval(
-          function(){
-
-            try{
-
-              if(
-                readyCheck()
-              ){
-
-                finish();
-
-              }
-
-            }
-            catch(error){}
-
-          },
-          100
-        );
-
-
-      const timeout =
-        setTimeout(
-          function(){
-
-            finish(
-              new Error(
-                'Scanner library timed out.'
-              )
-            );
-
-          },
-          timeoutMs
-        );
-
     }
   );
 
 }
 
 
-/* ==========================================================
-   OPENCV
-   ========================================================== */
-
-async function loadOpenCV(){
-
-  if(
-    cvReady ||
-    (
-      window.cv &&
-      window.cv.Mat &&
-      window.cv.matFromImageData
-    )
-  ){
-
-    cvReady =
-      true;
-
-    return;
-
-  }
-
-
-  await loadScript(
-
-    'https://docs.opencv.org/4.x/opencv.js',
-
-    function(){
-
-      return !!(
-        window.cv &&
-        window.cv.Mat &&
-        window.cv.matFromImageData
-      );
-
-    }
-
-  );
-
-
-  cvReady =
-    true;
-
-}
-
-
-/* ==========================================================
-   TESSERACT
-   ========================================================== */
-
-async function loadTesseract(){
-
-  if(
-    tesseractReady ||
-    window.Tesseract
-  ){
-
-    tesseractReady =
-      true;
-
-    return;
-
-  }
-
-
-  await loadScript(
-
-    'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
-
-    function(){
-
-      return !!window.Tesseract;
-
-    }
-
-  );
-
-
-  tesseractReady =
-    true;
-
-}
-
-
-/* ==========================================================
-   MEDIAPIPE
-   ========================================================== */
-
-async function loadFaceLandmarker(){
-
-  if(
-    faceLibraryReady
-  ){
-
-    return;
-
-  }
-
-
-  const module =
-    await import(
-      'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304'
-    );
-
-
-  const vision =
-    await module
-      .FilesetResolver
-      .forVisionTasks(
-
-        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm'
-
-      );
-
-
-  faceLandmarker =
-    await module
-      .FaceLandmarker
-      .createFromOptions(
-
-        vision,
-
-        {
-
-          baseOptions:{
-
-            modelAssetPath:
-
-              'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
-
-            delegate:
-              'GPU'
-
-          },
-
-          runningMode:
-            'IMAGE',
-
-          numFaces:
-            1,
-
-          outputFaceBlendshapes:
-            false
-
-        }
-
-      );
-
-
-  faceLibraryReady =
-    true;
-
-}
-
-
-/* ==========================================================
-   LIGHTING
-   ========================================================== */
-
-function checkLighting(){
-
-  if(
-    !video.videoWidth ||
-    !video.videoHeight
-  ){
-
-    return false;
-
-  }
-
-
-  const c =
-    document.createElement(
-      'canvas'
-    );
-
-
-  c.width =
-    40;
-
-  c.height =
-    40;
-
-
-  const ctx =
-    c.getContext(
-      '2d',
-      {
-        willReadFrequently:
-          true
-      }
-    );
-
-
-  ctx.drawImage(
-    video,
-    0,
-    0,
-    40,
-    40
-  );
-
-
-  const pixels =
-    ctx.getImageData(
-      0,
-      0,
-      40,
-      40
-    ).data;
-
-
-  let total =
-    0;
-
-
-  for(
-    let i = 0;
-    i < pixels.length;
-    i += 4
-  ){
-
-    total +=
-
-      0.299 * pixels[i]
-
-      +
-
-      0.587 * pixels[i + 1]
-
-      +
-
-      0.114 * pixels[i + 2];
-
-  }
-
-
-  return (
-
-    total /
-    (pixels.length / 4)
-
-  ) >= 42;
-
-}
-
-
-/* ==========================================================
-   DISTANCE
-   ========================================================== */
+/*
+ * ==========================================================
+ * DISTANCE
+ * ==========================================================
+ */
 
 function distance(
   a,
@@ -1278,16 +888,17 @@ function distance(
 }
 
 
-/* ==========================================================
-   ORDER DOCUMENT CORNERS
-   ========================================================== */
+/*
+ * ==========================================================
+ * ORDER CORNERS
+ * ==========================================================
+ */
 
-function orderPoints(
+function orderCorners(
   points
 ){
 
   if(
-    !points ||
     points.length !== 4
   ){
 
@@ -1303,7 +914,7 @@ function orderPoints(
     );
 
 
-  const diffs =
+  const differences =
     points.map(
       p =>
         p.x - p.y
@@ -1327,22 +938,22 @@ function orderPoints(
 
 
   const tr =
-    diffs.indexOf(
+    differences.indexOf(
       Math.max(
-        ...diffs
+        ...differences
       )
     );
 
 
   const bl =
-    diffs.indexOf(
+    differences.indexOf(
       Math.min(
-        ...diffs
+        ...differences
       )
     );
 
 
-  const ordered = [
+  const result = [
 
     points[tl],
     points[tr],
@@ -1352,13 +963,23 @@ function orderPoints(
   ];
 
 
-  if(
+  /*
+   * Make sure no point was duplicated.
+   */
+
+  const unique =
     new Set(
-      ordered.map(
+      result.map(
         p =>
-          p.x + ':' + p.y
+          p.x +
+          ':' +
+          p.y
       )
-    ).size !== 4
+    );
+
+
+  if(
+    unique.size !== 4
   ){
 
     return null;
@@ -1366,18 +987,32 @@ function orderPoints(
   }
 
 
-  return ordered;
+  return result;
 
 }
 
 
-/* ==========================================================
-   DOCUMENT DETECTION
-   ========================================================== */
+/*
+ * ==========================================================
+ * DOCUMENT DETECTION
+ *
+ * We look for the largest vertical
+ * rectangular document in the frame.
+ *
+ * No OCR.
+ * No face detection.
+ * No other requirements.
+ * ==========================================================
+ */
 
 function detectDocument(){
 
+  const cv =
+    window.cv;
+
+
   if(
+    !cv ||
     !video.videoWidth ||
     !video.videoHeight
   ){
@@ -1388,92 +1023,41 @@ function detectDocument(){
 
 
   /*
-   * ========================================================
-   * USE THE CENTER GUIDE AS THE DOCUMENT REGION
-   * ========================================================
-   */
-
-  const frameWidth =
-    video.videoWidth;
-
-  const frameHeight =
-    video.videoHeight;
-
-
-  /*
-   * These correspond to the visible
-   * portrait guide on the screen.
-   */
-
-  const guideWidth =
-    frameWidth * 0.68;
-
-  const guideHeight =
-    guideWidth * 4 / 3;
-
-
-  const guideLeft =
-    (frameWidth - guideWidth) / 2;
-
-
-  const guideTop =
-    (frameHeight - guideHeight) / 2;
-
-
-  const guideRight =
-    guideLeft + guideWidth;
-
-
-  const guideBottom =
-    guideTop + guideHeight;
-
-
-  /*
-   * Prevent invalid crop on unusual
-   * camera aspect ratios.
-   */
-
-  if(
-    guideTop < 0 ||
-    guideBottom > frameHeight
-  ){
-
-    return null;
-
-  }
-
-
-  /*
-   * ========================================================
-   * SMALL WORK IMAGE
-   * ========================================================
+   * Work on a small image for speed.
    */
 
   const scanWidth =
-    240;
+    360;
 
 
   const scale =
     scanWidth /
-    frameWidth;
+    video.videoWidth;
 
 
   const scanHeight =
     Math.round(
-      frameHeight * scale
+      video.videoHeight *
+      scale
     );
 
 
-  workCanvas.width =
+  const canvas =
+    document.createElement(
+      'canvas'
+    );
+
+
+  canvas.width =
     scanWidth;
 
 
-  workCanvas.height =
+  canvas.height =
     scanHeight;
 
 
-  const ctx =
-    workCanvas.getContext(
+  const context =
+    canvas.getContext(
       '2d',
       {
         willReadFrequently:true
@@ -1481,7 +1065,7 @@ function detectDocument(){
     );
 
 
-  ctx.drawImage(
+  context.drawImage(
 
     video,
 
@@ -1494,374 +1078,815 @@ function detectDocument(){
   );
 
 
-  /*
-   * ========================================================
-   * GUIDE ROI
-   * ========================================================
-   */
+  const frame =
+    context.getImageData(
 
-  const roiX =
-    Math.round(
-      guideLeft * scale
-    );
+      0,
+      0,
 
-
-  const roiY =
-    Math.round(
-      guideTop * scale
-    );
-
-
-  const roiWidth =
-    Math.round(
-      guideWidth * scale
-    );
-
-
-  const roiHeight =
-    Math.round(
-      guideHeight * scale
-    );
-
-
-  if(
-    roiWidth <= 0 ||
-    roiHeight <= 0
-  ){
-
-    return null;
-
-  }
-
-
-  /*
-   * ========================================================
-   * READ THE GUIDE REGION
-   * ========================================================
-   */
-
-  const imageData =
-    ctx.getImageData(
-
-      roiX,
-      roiY,
-
-      roiWidth,
-      roiHeight
+      scanWidth,
+      scanHeight
 
     );
 
 
-  const pixels =
-    imageData.data;
+  const source =
+    cv.matFromImageData(
+      frame
+    );
 
 
-  let totalBrightness =
-    0;
+  const gray =
+    new cv.Mat();
 
 
-  let brightPixels =
-    0;
+  const blur =
+    new cv.Mat();
 
 
-  let darkPixels =
-    0;
+  const edges =
+    new cv.Mat();
 
 
-  const totalPixels =
-    pixels.length / 4;
+  const contours =
+    new cv.MatVector();
 
 
-  for(
-    let i = 0;
-    i < pixels.length;
-    i += 4
-  ){
-
-    const r =
-      pixels[i];
+  const hierarchy =
+    new cv.Mat();
 
 
-    const g =
-      pixels[i + 1];
+  let candidates = [];
 
 
-    const b =
-      pixels[i + 2];
+  try{
+
+    /*
+     * Grayscale.
+     */
+
+    cv.cvtColor(
+
+      source,
+
+      gray,
+
+      cv.COLOR_RGBA2GRAY
+
+    );
 
 
-    const brightness =
-      (
-        0.299 * r +
-        0.587 * g +
-        0.114 * b
+    /*
+     * Reduce noise.
+     */
+
+    cv.GaussianBlur(
+
+      gray,
+
+      blur,
+
+      new cv.Size(
+        5,
+        5
+      ),
+
+      0
+
+    );
+
+
+    /*
+     * Detect boundaries.
+     */
+
+    cv.Canny(
+
+      blur,
+
+      edges,
+
+      50,
+
+      150
+
+    );
+
+
+    /*
+     * Close tiny gaps in the
+     * document border.
+     */
+
+    const kernel =
+      cv.Mat.ones(
+        3,
+        3,
+        cv.CV_8U
       );
 
 
-    totalBrightness +=
-      brightness;
+    cv.dilate(
+      edges,
+      edges,
+      kernel
+    );
 
 
-    if(
-      brightness >= 125
+    cv.erode(
+      edges,
+      edges,
+      kernel
+    );
+
+
+    kernel.delete();
+
+
+    /*
+     * Find contours.
+     */
+
+    cv.findContours(
+
+      edges,
+
+      contours,
+
+      hierarchy,
+
+      cv.RETR_EXTERNAL,
+
+      cv.CHAIN_APPROX_SIMPLE
+
+    );
+
+
+    const frameArea =
+      scanWidth *
+      scanHeight;
+
+
+    for(
+      let i = 0;
+      i < contours.size();
+      i++
     ){
 
-      brightPixels++;
+      const contour =
+        contours.get(i);
 
-    }
 
+      try{
 
-    if(
-      brightness <= 45
-    ){
+        const area =
+          Math.abs(
+            cv.contourArea(
+              contour
+            )
+          );
 
-      darkPixels++;
 
-    }
+        /*
+         * Ignore small objects.
+         */
 
-  }
+        if(
+          area <
+          frameArea * 0.08
+        ){
 
+          continue;
 
-  const averageBrightness =
-    totalBrightness /
-    totalPixels;
+        }
 
 
-  const brightRatio =
-    brightPixels /
-    totalPixels;
+        const perimeter =
+          cv.arcLength(
+            contour,
+            true
+          );
 
 
-  const darkRatio =
-    darkPixels /
-    totalPixels;
+        if(
+          perimeter <= 0
+        ){
 
+          continue;
 
-  /*
-   * ========================================================
-   * CARD PRESENCE
-   *
-   * Your physical ID is predominantly
-   * light-colored. We don't require every
-   * pixel to be bright because text,
-   * photo, logo and shadows are expected.
-   * ========================================================
-   */
+        }
 
-  const cardLooksPresent =
 
-    averageBrightness >= 70 &&
+        const approximation =
+          new cv.Mat();
 
-    brightRatio >= 0.30 &&
 
-    darkRatio <= 0.45;
+        try{
 
+          cv.approxPolyDP(
 
-  if(
-    !cardLooksPresent
-  ){
+            contour,
 
-    return null;
+            approximation,
 
-  }
+            perimeter *
+            0.025,
 
+            true
 
-  /*
-   * ========================================================
-   * ADDITIONAL CENTER-REGION TEST
-   *
-   * A normal person's face by itself will
-   * not produce the same portrait card
-   * brightness distribution.
-   * ========================================================
-   */
+          );
 
-  const innerX =
-    Math.round(
-      roiWidth * 0.10
-    );
 
+          /*
+           * We primarily want a four
+           * corner boundary.
+           */
 
-  const innerY =
-    Math.round(
-      roiHeight * 0.06
-    );
+          if(
+            approximation.rows !== 4
+          ){
 
+            /*
+             * Don't immediately reject it.
+             *
+             * Rounded/covered cards can
+             * still be recovered from the
+             * minimum-area rectangle.
+             */
 
-  const innerWidth =
-    Math.round(
-      roiWidth * 0.80
-    );
+            const rotated =
+              cv.minAreaRect(
+                contour
+              );
 
 
-  const innerHeight =
-    Math.round(
-      roiHeight * 0.88
-    );
+            const points =
+              cv.boxPoints(
+                rotated
+              );
 
 
-  const inner =
-    ctx.getImageData(
+            const usable =
+              evaluateRectangle(
+                points,
+                area,
+                scanWidth,
+                scanHeight,
+                scale
+              );
 
-      roiX + innerX,
-      roiY + innerY,
 
-      innerWidth,
-      innerHeight
+            if(
+              usable
+            ){
 
-    );
+              candidates.push(
+                usable
+              );
 
+            }
 
-  let innerBrightness =
-    0;
 
+            continue;
 
-  const innerPixels =
-    inner.data.length / 4;
+          }
 
 
-  for(
-    let i = 0;
-    i < inner.data.length;
-    i += 4
-  ){
+          const points = [];
 
-    innerBrightness +=
 
-      (
-        0.299 *
-        inner.data[i]
+          for(
+            let p = 0;
+            p < 4;
+            p++
+          ){
 
-        +
+            points.push({
 
-        0.587 *
-        inner.data[i + 1]
+              x:
+                approximation.intAt(
+                  p,
+                  0
+                ) / scale,
 
-        +
+              y:
+                approximation.intAt(
+                  p,
+                  1
+                ) / scale
 
-        0.114 *
-        inner.data[i + 2]
-      );
+            });
 
-  }
+          }
 
 
-  innerBrightness /=
-    innerPixels;
+          const ordered =
+            orderCorners(
+              points
+            );
 
 
-  /*
-   * The card should still be reasonably
-   * visible in its inner region.
-   */
+          if(
+            !ordered
+          ){
 
-  if(
-    innerBrightness < 55
-  ){
+            continue;
 
-    return null;
+          }
 
-  }
 
+          const candidate =
+            evaluateOrderedRectangle(
 
-  /*
-   * ========================================================
-   * RETURN THE GUIDE AS THE DOCUMENT
-   *
-   * This is intentional:
-   *
-   * We are telling the scanner that the
-   * physical ID has successfully occupied
-   * the portrait document zone.
-   *
-   * Perspective correction happens later.
-   * ========================================================
-   */
+              ordered,
 
-  return {
+              area,
 
-    points:[
+              scanWidth,
 
-      {
-        x:
-          guideLeft,
+              scanHeight
 
-        y:
-          guideTop
+            );
 
-      },
 
-      {
-        x:
-          guideRight,
+          if(
+            candidate
+          ){
 
-        y:
-          guideTop
+            candidates.push(
+              candidate
+            );
 
-      },
+          }
 
-      {
-        x:
-          guideRight,
+        }
+        finally{
 
-        y:
-          guideBottom
+          approximation.delete();
 
-      },
+        }
 
-      {
-        x:
-          guideLeft,
+      }
+      finally{
 
-        y:
-          guideBottom
+        contour.delete();
 
       }
 
-    ],
+    }
+
+  }
+  finally{
+
+    source.delete();
+
+    gray.delete();
+
+    blur.delete();
+
+    edges.delete();
+
+    contours.delete();
+
+    hierarchy.delete();
+
+  }
 
 
-    areaRatio:
+  /*
+   * Sort largest/strongest first.
+   */
 
+  candidates.sort(
+    function(
+      a,
+      b
+    ){
+
+      return (
+        b.score -
+        a.score
+      );
+
+    }
+  );
+
+
+  return (
+    candidates[0] ||
+    null
+  );
+
+}
+
+
+/*
+ * ==========================================================
+ * EVALUATE 4-CORNER RECTANGLE
+ * ==========================================================
+ */
+
+function evaluateOrderedRectangle(
+
+  points,
+
+  area,
+
+  scanWidth,
+
+  scanHeight
+
+){
+
+  const topWidth =
+    distance(
+      points[0],
+      points[1]
+    );
+
+
+  const bottomWidth =
+    distance(
+      points[3],
+      points[2]
+    );
+
+
+  const leftHeight =
+    distance(
+      points[0],
+      points[3]
+    );
+
+
+  const rightHeight =
+    distance(
+      points[1],
+      points[2]
+    );
+
+
+  const width =
+    (
+      topWidth +
+      bottomWidth
+    ) / 2;
+
+
+  const height =
+    (
+      leftHeight +
+      rightHeight
+    ) / 2;
+
+
+  if(
+    width <= 0 ||
+    height <= 0
+  ){
+
+    return null;
+
+  }
+
+
+  const ratio =
+    width /
+    height;
+
+
+  /*
+   * Your physical ID is portrait.
+   * Allow a fairly wide range because
+   * perspective changes the ratio.
+   */
+
+  if(
+    ratio < 0.35 ||
+    ratio > 0.95
+  ){
+
+    return null;
+
+  }
+
+
+  const areaRatio =
+    area /
+    (
+      scanWidth *
+      scanHeight
+    );
+
+
+  if(
+    areaRatio <
+    0.08
+  ){
+
+    return null;
+
+  }
+
+
+  const centerX =
+    (
+      points[0].x +
+      points[1].x +
+      points[2].x +
+      points[3].x
+    ) / 4;
+
+
+  const centerY =
+    (
+      points[0].y +
+      points[1].y +
+      points[2].y +
+      points[3].y
+    ) / 4;
+
+
+  const normalizedX =
+    centerX /
+    (
+      scanWidth /
       (
-        guideWidth *
-        guideHeight
+        video.videoWidth /
+        video.videoWidth
       )
+    );
 
-      /
 
-      (
-        frameWidth *
-        frameHeight
+  /*
+   * Instead of using the above
+   * calculation for screen position,
+   * calculate from actual camera.
+   */
+
+  const actualCenterX =
+    (
+      points[0].x +
+      points[1].x +
+      points[2].x +
+      points[3].x
+    ) / 4;
+
+
+  const actualCenterY =
+    (
+      points[0].y +
+      points[1].y +
+      points[2].y +
+      points[3].y
+    ) / 4;
+
+
+  const xNormalized =
+    actualCenterX /
+    video.videoWidth;
+
+
+  const yNormalized =
+    actualCenterY /
+    video.videoHeight;
+
+
+  /*
+   * Card should be reasonably centered,
+   * but not excessively strict.
+   */
+
+  const centerDistance =
+
+    Math.hypot(
+
+      xNormalized -
+      0.5,
+
+      yNormalized -
+      0.5
+
+    );
+
+
+  /*
+   * Aspect ratio target:
+   *
+   * 54 / 85.6 ≈ 0.631
+   */
+
+  const targetRatio =
+    54 / 85.6;
+
+
+  const ratioError =
+    Math.abs(
+      ratio -
+      targetRatio
+    );
+
+
+  /*
+   * Scoring.
+   *
+   * Larger document + centered +
+   * portrait ratio = better.
+   */
+
+  const score =
+
+    areaRatio * 100
+
+    +
+
+    Math.max(
+      0,
+      25 -
+      ratioError * 50
+    )
+
+    +
+
+    Math.max(
+      0,
+      20 -
+      centerDistance * 40
+    );
+
+
+  /*
+   * Convert coordinates back to
+   * actual camera resolution.
+   */
+
+  const scaleX =
+    video.videoWidth /
+    scanWidth;
+
+
+  const scaleY =
+    video.videoHeight /
+    scanHeight;
+
+
+  return {
+
+    points:
+      points.map(
+        function(
+          p
+        ){
+
+          return {
+
+            x:
+              p.x *
+              scaleX,
+
+            y:
+              p.y *
+              scaleY
+
+          };
+
+        }
       ),
 
 
-    ratio:
+    areaRatio:
+      areaRatio,
 
-      guideWidth /
-      guideHeight
+
+    ratio:
+      ratio,
+
+
+    score:
+      score
 
   };
 
 }
 
 
-/* ==========================================================
-   STABILITY
-   ========================================================== */
+/*
+ * ==========================================================
+ * EVALUATE MIN AREA RECTANGLE
+ * ==========================================================
+ */
 
-function updateStability(
+function evaluateRectangle(
+
+  boxPoints,
+
+  area,
+
+  scanWidth,
+
+  scanHeight,
+
+  scale
+
+){
+
+  const points = [];
+
+
+  for(
+    let i = 0;
+    i < 4;
+    i++
+  ){
+
+    points.push({
+
+      x:
+        boxPoints[i].x,
+
+      y:
+        boxPoints[i].y
+
+    });
+
+  }
+
+
+  const ordered =
+    orderCorners(
+      points
+    );
+
+
+  if(
+    !ordered
+  ){
+
+    return null;
+
+  }
+
+
+  return evaluateOrderedRectangle(
+
+    ordered,
+
+    area,
+
+    scanWidth,
+
+    scanHeight
+
+  );
+
+}
+
+
+/*
+ * ==========================================================
+ * STABILITY
+ * ==========================================================
+ */
+
+function getCenter(
   card
 ){
 
+  return {
+
+    x:
+      (
+        card.points[0].x +
+        card.points[1].x +
+        card.points[2].x +
+        card.points[3].x
+      ) / 4,
+
+    y:
+      (
+        card.points[0].y +
+        card.points[1].y +
+        card.points[2].y +
+        card.points[3].y
+      ) / 4
+
+  };
+
+}
+
+
+function isStable(
+  current
+){
+
   if(
-    !card
+    !current
   ){
 
-    lastCard =
+    lastDetection =
       null;
 
-    stableCount =
+    stableFrames =
       0;
 
     return false;
@@ -1870,55 +1895,30 @@ function updateStability(
 
 
   if(
-    !lastCard
+    !lastDetection
   ){
 
-    lastCard =
-      card;
+    lastDetection =
+      current;
 
-    stableCount =
+    stableFrames =
       0;
 
     return false;
-
-  }
-
-
-  function center(
-    item
-  ){
-
-    return {
-
-      x:
-        (
-          item.points[0].x +
-          item.points[1].x +
-          item.points[2].x +
-          item.points[3].x
-
-        ) / 4,
-
-      y:
-        (
-          item.points[0].y +
-          item.points[1].y +
-          item.points[2].y +
-          item.points[3].y
-
-        ) / 4
-
-    };
 
   }
 
 
   const a =
-    center(card);
+    getCenter(
+      current
+    );
 
 
   const b =
-    center(lastCard);
+    getCenter(
+      lastDetection
+    );
 
 
   const movement =
@@ -1931,126 +1931,83 @@ function updateStability(
     );
 
 
-  const sizeChange =
+  const sizeDifference =
+
     Math.abs(
 
-      card.areaRatio -
-      lastCard.areaRatio
+      current.areaRatio -
+      lastDetection.areaRatio
 
     );
 
 
   if(
-    movement < 12 &&
-    sizeChange < 0.03
+    movement < 16 &&
+    sizeDifference < 0.035
   ){
 
-    stableCount++;
+    stableFrames++;
 
   }
   else{
 
-    stableCount =
+    stableFrames =
       0;
 
   }
 
 
-  lastCard =
-    card;
+  lastDetection =
+    current;
 
 
   return (
-    stableCount >= 3
+    stableFrames >= 3
   );
 
 }
 
 
-/* ==========================================================
-   LIVE CHECK UI
-   ========================================================== */
+/*
+ * ==========================================================
+ * UPDATE STATUS
+ * ==========================================================
+ */
 
-function updateLiveUI(
+function updateStatus(
   card,
   stable
 ){
 
-  const cardOK =
-    !!card;
-
-
-  const positionOK =
-    !!card;
-
-
-  const sizeOK =
-    !!card &&
-    card.areaRatio >= 0.13;
-
-
-  const lightingOK =
-    checkLighting();
-
-
-  setCheck(
-    'checkCard',
-    cardOK
-  );
-
-
-  setCheck(
-    'checkPosition',
-    positionOK
-  );
-
-
-  setCheck(
-    'checkSize',
-    sizeOK
-  );
-
-
-  setCheck(
-    'checkLighting',
-    lightingOK
-  );
-
-
   if(
-    !cardOK
+    !card
   ){
 
+    scannerGuide
+      .classList
+      .remove(
+        'detected'
+      );
+
+
     instruction.textContent =
-      'Move your physical Student ID into the center guide.';
+      'Position your Student ID inside the guide.';
+
+
+    status.textContent =
+      'Searching for the card boundaries...';
+
 
     return;
 
   }
 
 
-  if(
-    !sizeOK
-  ){
-
-    instruction.textContent =
-      'Move the Student ID closer so it is large enough.';
-
-    return;
-
-  }
-
-
-  if(
-    !lightingOK
-  ){
-
-    instruction.textContent =
-      'Move to a brighter area so the ID is clearly visible.';
-
-    return;
-
-  }
+  scannerGuide
+    .classList
+    .add(
+      'detected'
+    );
 
 
   if(
@@ -2058,29 +2015,35 @@ function updateLiveUI(
   ){
 
     instruction.textContent =
-      'Hold the Student ID steady...';
+      'ID detected. Hold still...';
+
+
+    status.textContent =
+      'Preparing automatic capture...';
+
 
     return;
 
   }
 
 
-  scannerGuide.classList.add(
-    'ready'
-  );
-
-
   instruction.textContent =
     'ID detected. Capturing...';
+
+
+  status.textContent =
+    'Please hold still.';
 
 }
 
 
-/* ==========================================================
-   PERSPECTIVE CORRECTION
-   ========================================================== */
+/*
+ * ==========================================================
+ * PERSPECTIVE CORRECTION
+ * ==========================================================
+ */
 
-function correctPerspective(
+function perspectiveCorrect(
   card
 ){
 
@@ -2093,7 +2056,7 @@ function correctPerspective(
   ){
 
     throw new Error(
-      'OpenCV unavailable.'
+      'OpenCV is not ready.'
     );
 
   }
@@ -2112,97 +2075,104 @@ function correctPerspective(
     card.points[3];
 
 
+  const widthTop =
+    distance(
+      tl,
+      tr
+    );
+
+
+  const widthBottom =
+    distance(
+      bl,
+      br
+    );
+
+
+  const heightLeft =
+    distance(
+      tl,
+      bl
+    );
+
+
+  const heightRight =
+    distance(
+      tr,
+      br
+    );
+
+
   const outputWidth =
     Math.round(
-
       Math.max(
-
-        distance(
-          tl,
-          tr
-        ),
-
-        distance(
-          bl,
-          br
-        )
-
+        widthTop,
+        widthBottom
       )
-
     );
 
 
   const outputHeight =
     Math.round(
-
       Math.max(
-
-        distance(
-          tl,
-          bl
-        ),
-
-        distance(
-          tr,
-          br
-        )
-
+        heightLeft,
+        heightRight
       )
-
     );
 
 
-  const source =
+  const sourceCanvas =
     document.createElement(
       'canvas'
     );
 
 
-  source.width =
+  sourceCanvas.width =
     video.videoWidth;
 
-  source.height =
+
+  sourceCanvas.height =
     video.videoHeight;
 
 
-  const sourceContext =
-    source.getContext(
+  const ctx =
+    sourceCanvas.getContext(
       '2d'
     );
 
 
-  sourceContext.drawImage(
+  ctx.drawImage(
 
     video,
 
     0,
     0,
 
-    source.width,
-    source.height
+    sourceCanvas.width,
+    sourceCanvas.height
 
   );
 
 
   const imageData =
-    sourceContext.getImageData(
+    ctx.getImageData(
 
       0,
       0,
 
-      source.width,
-      source.height
+      sourceCanvas.width,
+      sourceCanvas.height
 
     );
 
 
-  const src =
+  const source =
     cv.matFromImageData(
       imageData
     );
 
 
-  const dst =
+  const destination =
     new cv.Mat();
 
 
@@ -2272,9 +2242,9 @@ function correctPerspective(
 
   cv.warpPerspective(
 
-    src,
+    source,
 
-    dst,
+    destination,
 
     transform,
 
@@ -2286,35 +2256,36 @@ function correctPerspective(
   );
 
 
-  const output =
+  const outputCanvas =
     document.createElement(
       'canvas'
     );
 
 
-  output.width =
+  outputCanvas.width =
     outputWidth;
 
-  output.height =
+
+  outputCanvas.height =
     outputHeight;
 
 
   cv.imshow(
-    output,
-    dst
+    outputCanvas,
+    destination
   );
 
 
   const result =
-    output.toDataURL(
+    outputCanvas.toDataURL(
       'image/jpeg',
       0.94
     );
 
 
-  src.delete();
+  source.delete();
 
-  dst.delete();
+  destination.delete();
 
   sourcePoints.delete();
 
@@ -2328,11 +2299,13 @@ function correctPerspective(
 }
 
 
-/* ==========================================================
-   AUTO CAPTURE
-   ========================================================== */
+/*
+ * ==========================================================
+ * AUTO CAPTURE
+ * ==========================================================
+ */
 
-async function autoCapture(
+function autoCapture(
   card
 ){
 
@@ -2352,11 +2325,11 @@ async function autoCapture(
   try{
 
     instruction.textContent =
-      'Capturing and aligning your Student ID...';
+      'Scanning Student ID...';
 
 
     const corrected =
-      correctPerspective(
+      perspectiveCorrect(
         card
       );
 
@@ -2385,16 +2358,23 @@ async function autoCapture(
       'inline-block';
 
 
-    stopCamera();
+    useButton.style.display =
+      'inline-block';
+
+
+    resultLabel.style.display =
+      'block';
+
+
+    instruction.textContent =
+      '✓ Student ID captured';
 
 
     status.textContent =
-      'ID captured. Checking your ID...';
+      'Review the corrected scan before continuing.';
 
 
-    await verifyCapturedID(
-      corrected
-    );
+    stopCamera();
 
   }
   catch(error){
@@ -2409,356 +2389,28 @@ async function autoCapture(
 
 
     showError(
-      'The Student ID could not be captured. Please try again.'
+      'The ID could not be corrected. Please try again.';
+
     );
-
-
-    await retakeID();
 
   }
 
 }
 
 
-/* ==========================================================
-   OCR + FACE VERIFICATION
-   ========================================================== */
-
-function normalizeText(
-  text
-){
-
-  return String(
-    text || ''
-  )
-
-    .toUpperCase()
-
-    .replace(
-      /[^A-Z0-9\s]/g,
-      ' '
-    )
-
-    .replace(
-      /\s+/g,
-      ' '
-    )
-
-    .trim();
-
-}
-
-
-function normalizeCompact(
-  text
-){
-
-  return normalizeText(
-    text
-  )
-
-    .replace(
-      /\s/g,
-      ''
-    );
-
-}
-
-
-async function verifyCapturedID(
-  imageDataUrl
-){
-
-  clearError();
-
-  setCheck(
-    'checkName',
-    false
-  );
-
-  setCheck(
-    'checkId',
-    false
-  );
-
-  setCheck(
-    'checkFace',
-    false
-  );
-
-
-  useButton.style.display =
-    'none';
-
-
-  try{
-
-    await loadTesseract();
-
-
-    const worker =
-      await Tesseract
-        .createWorker(
-          'eng',
-          1
-        );
-
-
-    const result =
-      await worker.recognize(
-        imageDataUrl
-      );
-
-
-    const text =
-      result &&
-      result.data
-        ? result.data.text || ''
-        : '';
-
-
-    await worker.terminate();
-
-
-    const ocrBox =
-      document.getElementById(
-        'ocrBox'
-      );
-
-
-    ocrBox.textContent =
-      text ||
-      'No readable text detected.';
-
-
-    ocrBox.style.display =
-      'block';
-
-
-    const normalized =
-      normalizeText(
-        text
-      );
-
-
-    const expectedNameText =
-      normalizeText(
-        expectedName
-      );
-
-
-    const expectedIdText =
-      normalizeCompact(
-        expectedStudentId
-      );
-
-
-    const nameParts =
-      expectedNameText
-        .split(' ')
-        .filter(
-          function(part){
-
-            return part.length >= 2;
-
-          }
-        );
-
-
-    let nameMatches =
-      0;
-
-
-    nameParts.forEach(
-      function(part){
-
-        if(
-          normalized.indexOf(
-            part
-          ) !== -1
-        ){
-
-          nameMatches++;
-
-        }
-
-      }
-    );
-
-
-    const nameOK =
-
-      nameParts.length > 0
-
-      &&
-
-      nameMatches >=
-
-      Math.max(
-
-        1,
-
-        Math.ceil(
-
-          nameParts.length *
-          0.60
-
-        )
-
-      );
-
-
-    const idOK =
-
-      expectedIdText.length > 0
-
-      &&
-
-      normalizeCompact(
-        text
-      ).indexOf(
-        expectedIdText
-      ) !== -1;
-
-
-    setCheck(
-      'checkName',
-      nameOK
-    );
-
-
-    setCheck(
-      'checkId',
-      idOK
-    );
-
-
-    /*
-     * IMPORTANT:
-     *
-     * The face check runs on the
-     * CROPPED ID IMAGE.
-     *
-     * This means it verifies the face
-     * printed on the physical ID,
-     * not merely the person holding it.
-     */
-
-    let faceOK =
-      false;
-
-
-    try{
-
-      await loadFaceLandmarker();
-
-
-      const image =
-        new Image();
-
-
-      await new Promise(
-        function(
-          resolve,
-          reject
-        ){
-
-          image.onload =
-            resolve;
-
-          image.onerror =
-            reject;
-
-          image.src =
-            imageDataUrl;
-
-        }
-      );
-
-
-      const faceResult =
-        faceLandmarker.detect(
-          image
-        );
-
-
-      faceOK =
-        !!(
-          faceResult &&
-
-          faceResult.faceLandmarks &&
-
-          faceResult.faceLandmarks.length >= 1
-
-        );
-
-    }
-    catch(error){
-
-      console.warn(
-        'Face verification unavailable:',
-        error
-      );
-
-    }
-
-
-    setCheck(
-      'checkFace',
-      faceOK
-    );
-
-
-    if(
-      nameOK &&
-      idOK &&
-      faceOK
-    ){
-
-      status.textContent =
-        'Student ID verified successfully. Review the scanned photo.';
-
-
-      useButton.style.display =
-        'inline-block';
-
-    }
-    else{
-
-      status.textContent =
-        'Verification failed. Retake the ID with the name, Student ID number, and printed face clearly visible.';
-
-    }
-
-  }
-  catch(error){
-
-    console.error(
-      error
-    );
-
-
-    status.textContent =
-      'The Student ID could not be verified. Please retake the photo.';
-
-  }
-
-}
-
-
-/* ==========================================================
-   SCAN LOOP
-   ========================================================== */
-
-function beginScanning(){
+/*
+ * ==========================================================
+ * SCAN LOOP
+ * ==========================================================
+ */
+
+function scheduleScan(){
 
   if(
-    scanTimer
+    autoCaptured
   ){
 
-    clearTimeout(
-      scanTimer
-    );
+    return;
 
   }
 
@@ -2766,18 +2418,45 @@ function beginScanning(){
   scanTimer =
     setTimeout(
       scanFrame,
-      300
+      250
     );
 
 }
 
 
-async function scanFrame(){
+function scanFrame(){
 
   if(
     scanning ||
     autoCaptured
   ){
+
+    return;
+
+  }
+
+
+  if(
+    !cvReady
+  ){
+
+    status.textContent =
+      'Loading scanner...';
+
+
+    scheduleScan();
+
+    return;
+
+  }
+
+
+  if(
+    !video.videoWidth ||
+    !video.videoHeight
+  ){
+
+    scheduleScan();
 
     return;
 
@@ -2790,47 +2469,28 @@ async function scanFrame(){
 
   try{
 
-    if(
-      !cvReady ||
-      !window.cv
-    ){
-
-      status.textContent =
-        'Loading document scanner...';
-
-      return;
-
-    }
-
-
     const card =
       detectDocument();
 
 
     const stable =
-      updateStability(
+      isStable(
         card
       );
 
 
-    updateLiveUI(
+    updateStatus(
       card,
       stable
     );
 
 
-    const lightingOK =
-      checkLighting();
-
-
     if(
       card &&
-      stable &&
-      lightingOK &&
-      !autoCaptured
+      stable
     ){
 
-      await autoCapture(
+      autoCapture(
         card
       );
 
@@ -2856,24 +2516,16 @@ async function scanFrame(){
   }
 
 
-  if(
-    !autoCaptured
-  ){
-
-    scanTimer =
-      setTimeout(
-        scanFrame,
-        350
-      );
-
-  }
+  scheduleScan();
 
 }
 
 
-/* ==========================================================
-   CAMERA
-   ========================================================== */
+/*
+ * ==========================================================
+ * CAMERA
+ * ==========================================================
+ */
 
 async function startCamera(){
 
@@ -2884,14 +2536,17 @@ async function startCamera(){
 
 
   instruction.textContent =
-    'Requesting camera access...';
+    'Requesting camera...';
 
 
-  let localStream =
-    null;
+  let localStream;
 
 
   try{
+
+    /*
+     * Prefer rear camera on phones.
+     */
 
     localStream =
       await navigator
@@ -2907,12 +2562,12 @@ async function startCamera(){
 
             width:{
               ideal:
-                640
+                1280
             },
 
             height:{
               ideal:
-                480
+                720
             }
 
           },
@@ -2925,8 +2580,7 @@ async function startCamera(){
   catch(error){
 
     /*
-     * Fallback for laptops that
-     * do not support environment mode.
+     * Fallback for laptops.
      */
 
     localStream =
@@ -2970,21 +2624,20 @@ async function startCamera(){
     'Camera ready. Position your Student ID in the center.';
 
 
-  beginScanning();
+  scheduleScan();
 
 }
 
 
-/* ==========================================================
-   RETAKE
-   ========================================================== */
+/*
+ * ==========================================================
+ * RETAKE
+ * ==========================================================
+ */
 
-async function retakeID(){
+async function retakeScan(){
 
   clearError();
-
-
-  stopCamera();
 
 
   capturedData =
@@ -2995,19 +2648,19 @@ async function retakeID(){
     false;
 
 
-  lastCard =
+  lastDetection =
     null;
 
 
-  stableCount =
+  stableFrames =
     0;
 
 
-  scanning =
-    false;
+  capturedImage.style.display =
+    'none';
 
 
-  useButton.style.display =
+  resultLabel.style.display =
     'none';
 
 
@@ -3015,53 +2668,31 @@ async function retakeID(){
     'none';
 
 
-  capturedImage.style.display =
+  useButton.style.display =
     'none';
-
-
-  video.style.display =
-    'block';
 
 
   scannerGuide.style.display =
     'block';
 
 
-  document
-    .getElementById(
-      'ocrBox'
-    )
-    .style.display =
-    'none';
+  scannerGuide
+    .classList
+    .remove(
+      'detected'
+    );
 
 
-  status.textContent =
-    '';
-
-
-  [
-    'checkCard',
-    'checkPosition',
-    'checkSize',
-    'checkLighting',
-    'checkFace',
-    'checkName',
-    'checkId'
-
-  ].forEach(
-    function(id){
-
-      setCheck(
-        id,
-        false
-      );
-
-    }
-  );
+  video.style.display =
+    'block';
 
 
   instruction.textContent =
     'Starting camera...';
+
+
+  status.textContent =
+    'Position your ID inside the guide.';
 
 
   await startCamera();
@@ -3069,32 +2700,26 @@ async function retakeID(){
 }
 
 
-/* ==========================================================
-   USE ID
-   ========================================================== */
+/*
+ * ==========================================================
+ * USE SCAN
+ * ==========================================================
+ */
 
-function useID(){
-
-  clearError();
-
+function useScan(){
 
   if(
     !capturedData
   ){
 
     showError(
-      'No Student ID was captured.'
+      'No Student ID scan is available.'
     );
 
     return;
 
   }
 
-
-  /*
-   * The button is only shown after
-   * all verification checks pass.
-   */
 
   if(
     window.opener
@@ -3119,8 +2744,12 @@ function useID(){
   }
 
 
-  status.textContent =
+  instruction.textContent =
     'Student ID accepted. Returning to the application...';
+
+
+  status.textContent =
+    '';
 
 
   setTimeout(
@@ -3135,9 +2764,11 @@ function useID(){
 }
 
 
-/* ==========================================================
-   STOP CAMERA
-   ========================================================== */
+/*
+ * ==========================================================
+ * STOP CAMERA
+ * ==========================================================
+ */
 
 function stopCamera(){
 
@@ -3162,7 +2793,9 @@ function stopCamera(){
     stream
       .getTracks()
       .forEach(
-        function(track){
+        function(
+          track
+        ){
 
           track.stop();
 
@@ -3188,9 +2821,11 @@ function stopCamera(){
 }
 
 
-/* ==========================================================
-   PARENT COMMUNICATION
-   ========================================================== */
+/*
+ * ==========================================================
+ * PARENT COMMUNICATION
+ * ==========================================================
+ */
 
 window.addEventListener(
   'load',
@@ -3217,6 +2852,16 @@ window.addEventListener(
 );
 
 
+/*
+ * ==========================================================
+ * RECEIVE STUDENT DATA
+ *
+ * We don't use it for verification
+ * anymore. It is simply retained for
+ * future integration.
+ * ==========================================================
+ */
+
 window.addEventListener(
   'message',
   function(event){
@@ -3235,24 +2880,12 @@ window.addEventListener(
       'ID_CAMERA_INIT'
     ){
 
-      expectedName =
-        String(
-          event.data.studentName ||
-          ''
-        ).trim();
-
-
-      expectedStudentId =
-        String(
-          event.data.studentId ||
-          ''
-        ).trim();
-
+      /*
+       * No verification is performed.
+       */
 
       status.textContent =
-        'Scanner ready for ' +
-        expectedName +
-        '.';
+        'Scanner ready.';
 
     }
 
@@ -3260,9 +2893,11 @@ window.addEventListener(
 );
 
 
-/* ==========================================================
-   CLEANUP
-   ========================================================== */
+/*
+ * ==========================================================
+ * CLEANUP
+ * ==========================================================
+ */
 
 window.addEventListener(
   'beforeunload',
@@ -3270,25 +2905,27 @@ window.addEventListener(
 );
 
 
-/* ==========================================================
-   BUTTON FUNCTIONS
-   ========================================================== */
+/*
+ * Expose functions for buttons.
+ */
 
-window.retakeID =
-  retakeID;
+window.retakeScan =
+  retakeScan;
 
-window.useID =
-  useID;
+window.useScan =
+  useScan;
 
 
-/* ==========================================================
-   INITIALIZE
-   ========================================================== */
+/*
+ * ==========================================================
+ * START
+ * ==========================================================
+ */
 
 async function initialize(){
 
   /*
-   * CAMERA STARTS IMMEDIATELY.
+   * CAMERA FIRST.
    */
 
   try{
@@ -3299,13 +2936,12 @@ async function initialize(){
   catch(error){
 
     console.error(
-      'Camera startup error:',
       error
     );
 
 
     showError(
-      'Unable to start the camera. Please allow camera access for this site and refresh the page.'
+      'Unable to access the camera. Please allow camera access and refresh the page.'
     );
 
 
@@ -3315,62 +2951,34 @@ async function initialize(){
 
 
   /*
-   * LOAD HEAVY LIBRARIES AFTER
-   * CAMERA IS ALREADY RUNNING.
+   * Load OpenCV AFTER camera is visible.
    */
 
-  setTimeout(
-    function(){
+  try{
 
-      loadOpenCV()
-
-        .then(
-          function(){
-
-            cvReady =
-              true;
-
-            status.textContent =
-              'Document scanner ready.';
-
-          }
-        )
-
-        .catch(
-          function(error){
-
-            console.error(
-              'OpenCV error:',
-              error
-            );
-
-            status.textContent =
-              'Document scanner could not load.';
-
-          }
-        );
+    status.textContent =
+      'Loading automatic document scanner...';
 
 
-      /*
-       * Face library loads separately.
-       */
+    await loadOpenCV();
 
-      loadFaceLandmarker()
 
-        .catch(
-          function(error){
+    status.textContent =
+      'Document scanner ready.';
 
-            console.warn(
-              'Face library unavailable:',
-              error
-            );
+  }
+  catch(error){
 
-          }
-        );
+    console.error(
+      'OpenCV error:',
+      error
+    );
 
-    },
-    500
-  );
+
+    status.textContent =
+      'Document scanner could not load.';
+
+  }
 
 }
 
