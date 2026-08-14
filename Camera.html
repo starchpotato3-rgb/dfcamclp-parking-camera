@@ -333,7 +333,6 @@ button:disabled{
   <button
     id="takeButton"
     class="primary"
-    disabled
     onclick="takePhoto()"
   >
     Take Photo
@@ -504,32 +503,6 @@ function updateChecks(){
   setCheck(
     document.getElementById('checkSmile'),
     currentChecks.smile
-  );
-
-
-  /*
-   * IMPORTANT:
-   * We now allow the photo button as long
-   * as the face is detected, centered,
-   * front-facing and sufficiently visible.
-   *
-   * Smile is guidance, not a hard blocker.
-   */
-
-  const ready =
-    currentChecks.face &&
-    currentChecks.center &&
-    currentChecks.front &&
-    currentChecks.lighting;
-
-
-  takeButton.disabled =
-    !ready;
-
-
-  faceGuide.classList.toggle(
-    'ready',
-    ready
   );
 
 
@@ -988,18 +961,13 @@ function takePhoto(){
 
 
   /*
-   * Hard requirements only.
+   * HARD REQUIREMENTS
    */
 
-  if(
-    !currentChecks.face ||
-    !currentChecks.center ||
-    !currentChecks.front ||
-    !currentChecks.lighting
-  ){
+  if(!currentChecks.face){
 
     showError(
-      'Please position your face correctly before taking the photo.'
+      'Please make sure exactly one face is visible.'
     );
 
     return;
@@ -1007,14 +975,47 @@ function takePhoto(){
   }
 
 
-  const size =
-    Math.min(
-      video.videoWidth,
-      video.videoHeight
+  if(!currentChecks.center){
+
+    showError(
+      'Please center your face inside the guide.'
     );
 
+    return;
 
-  if(!size){
+  }
+
+
+  if(!currentChecks.front){
+
+    showError(
+      'Please look directly at the camera.'
+    );
+
+    return;
+
+  }
+
+
+  if(!currentChecks.lighting){
+
+    showError(
+      'Please move to an area with enough light so your face is clearly visible.'
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * CAMERA CHECK
+   */
+
+  if(
+    !video.videoWidth ||
+    !video.videoHeight
+  ){
 
     showError(
       'Camera is not ready yet.'
@@ -1025,6 +1026,17 @@ function takePhoto(){
   }
 
 
+  /*
+   * FORCE SQUARE 1:1 CAPTURE
+   */
+
+  const size =
+    Math.min(
+      video.videoWidth,
+      video.videoHeight
+    );
+
+
   canvas.width =
     size;
 
@@ -1033,7 +1045,9 @@ function takePhoto(){
 
 
   const ctx =
-    canvas.getContext('2d');
+    canvas.getContext(
+      '2d'
+    );
 
 
   const x =
@@ -1069,12 +1083,20 @@ function takePhoto(){
   );
 
 
+  /*
+   * CREATE IMAGE
+   */
+
   capturedData =
     canvas.toDataURL(
       'image/jpeg',
       0.92
     );
 
+
+  /*
+   * SHOW PREVIEW
+   */
 
   capturedImage.src =
     capturedData;
