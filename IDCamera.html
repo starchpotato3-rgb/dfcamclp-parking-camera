@@ -3,376 +3,504 @@
 
 <head>
 
-<meta charset="UTF-8">
+  <meta charset="UTF-8">
 
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1"
->
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
 
-<title>
-  Student ID Verification
-</title>
+  <title>
+    Student ID Verification
+  </title>
 
 
-<style>
+  <style>
 
-*{
-  box-sizing:border-box;
-}
+    *{
+      box-sizing:border-box;
+    }
 
 
-body{
+    body{
+      margin:0;
+      min-height:100vh;
+      padding:18px;
 
-  margin:0;
+      background:#f4f7fb;
 
-  min-height:100vh;
+      font-family:Arial,sans-serif;
 
-  padding:18px;
+      color:#172033;
 
-  background:#f4f7fb;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
 
-  font-family:Arial,sans-serif;
 
-  color:#172033;
+    .card{
+      width:100%;
+      max-width:650px;
 
-  display:flex;
+      background:#fff;
 
-  justify-content:center;
+      border-radius:20px;
 
-  align-items:center;
+      padding:20px;
 
-}
+      box-shadow:
+        0 10px 35px
+        rgba(0,0,0,.12);
 
+      text-align:center;
+    }
 
-.card{
 
-  width:100%;
+    h1{
+      margin:0 0 7px;
+    }
 
-  max-width:720px;
 
-  background:white;
+    .muted{
+      color:#667085;
+    }
 
-  border-radius:20px;
 
-  padding:20px;
+    /*
+     * ==========================================================
+     * CAMERA
+     * ==========================================================
+     */
 
-  box-shadow:
-    0 10px 35px
-    rgba(0,0,0,.12);
+    .camera-wrap{
 
-  text-align:center;
+      width:100%;
 
-}
+      max-width:430px;
 
+      aspect-ratio:3 / 4;
 
-h1{
-  margin:0 0 8px;
-}
+      margin:20px auto;
 
+      position:relative;
 
-.muted{
-  color:#667085;
-}
+      overflow:hidden;
 
+      border-radius:18px;
 
-.camera-wrap{
-  width:100%;
-  max-width:420px;
-  aspect-ratio:3/4;
+      background:#111827;
+    }
 
-  margin:20px auto;
 
-  position:relative;
+    video,
+    canvas,
+    #capturedImage{
 
-  overflow:hidden;
+      position:absolute;
 
-  border-radius:18px;
+      inset:0;
 
-  background:#111827;
+      width:100%;
 
-}
+      height:100%;
 
+      object-fit:cover;
 
-video,
-canvas,
-#capturedImage{
+    }
 
-  position:absolute;
 
-  inset:0;
+    video{
+      display:block;
+    }
 
-  width:100%;
 
-  height:100%;
+    canvas{
+      display:none;
+    }
 
-  object-fit:cover;
 
-}
+    #capturedImage{
+      display:none;
+    }
 
 
-video{
-  display:block;
-}
+    /*
+     * ==========================================================
+     * CENTERED DOCUMENT GUIDE
+     * ==========================================================
+     */
 
+    .scanner-guide{
 
-canvas{
-  display:none;
-}
+      position:absolute;
 
+      left:50%;
 
-#capturedImage{
-  display:none;
-}
+      top:50%;
 
+      width:68%;
 
-/*
- * Physical school ID guide.
- */
+      aspect-ratio:3 / 4;
 
-.id-guide{
-  width:72%;
-  height:88%;
+      transform:
+        translate(-50%,-50%);
 
-  transform:
-    translate(-50%,-50%);
+      border:
+        3px solid rgba(
+          255,
+          255,
+          255,
+          .92
+        );
 
-  border:
-    3px solid white;
+      border-radius:16px;
 
-  border-radius:16px;
+      pointer-events:none;
 
-  box-shadow:
-    0 0 0 9999px
-    rgba(0,0,0,.30);
+      box-shadow:
+        0 0 0 9999px
+        rgba(0,0,0,.30);
 
-  pointer-events:none;
+      transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
 
-  transition:
-    border-color .2s ease;
+    }
 
-}
 
+    .scanner-guide.ready{
 
-.id-guide.ready{
+      border-color:
+        #22c55e;
 
-  border-color:
-    #22c55e;
+    }
 
-}
 
+    /*
+     * Corner indicators
+     */
 
-.instruction{
+    .corner{
 
-  margin-top:10px;
+      position:absolute;
 
-  font-weight:800;
+      width:28px;
 
-}
+      height:28px;
 
+      border-color:white;
 
-.check-list{
+      border-style:solid;
 
-  display:grid;
+    }
 
-  gap:8px;
 
-  margin:
-    16px 0;
+    .corner.tl{
 
-  padding:14px;
+      top:-2px;
+      left:-2px;
 
-  text-align:left;
+      border-width:
+        4px 0 0 4px;
 
-  background:#f8fafc;
+      border-radius:8px 0 0 0;
 
-  border:
-    1px solid #e5e7eb;
+    }
 
-  border-radius:14px;
 
-}
+    .corner.tr{
 
+      top:-2px;
+      right:-2px;
 
-.check{
+      border-width:
+        4px 4px 0 0;
 
-  display:flex;
+      border-radius:0 8px 0 0;
 
-  align-items:center;
+    }
 
-  gap:9px;
 
-  font-size:14px;
+    .corner.bl{
 
-}
+      bottom:-2px;
+      left:-2px;
 
+      border-width:
+        0 0 4px 4px;
 
-.check-icon{
+      border-radius:0 0 0 8px;
 
-  width:22px;
+    }
 
-  height:22px;
 
-  border-radius:50%;
+    .corner.br{
 
-  display:flex;
+      bottom:-2px;
+      right:-2px;
 
-  align-items:center;
+      border-width:
+        0 4px 4px 0;
 
-  justify-content:center;
+      border-radius:0 0 8px 0;
 
-  flex:0 0 auto;
+    }
 
-  background:#e5e7eb;
 
-  color:#667085;
+    /*
+     * ==========================================================
+     * INSTRUCTIONS
+     * ==========================================================
+     */
 
-  font-size:12px;
+    .instruction{
 
-  font-weight:800;
+      margin-top:10px;
 
-}
+      font-weight:800;
 
+      font-size:15px;
 
-.check.ok .check-icon{
+    }
 
-  background:#dcfce7;
 
-  color:#166534;
+    .subinstruction{
 
-}
+      margin-top:7px;
 
+      font-size:13px;
 
-.check.bad .check-icon{
+      color:#667085;
 
-  background:#fee2e2;
+    }
 
-  color:#991b1b;
 
-}
+    /*
+     * ==========================================================
+     * CHECKS
+     * ==========================================================
+     */
 
+    .check-list{
 
-.actions{
+      display:grid;
 
-  display:flex;
+      gap:8px;
 
-  justify-content:center;
+      margin:16px 0;
 
-  gap:10px;
+      padding:14px;
 
-  flex-wrap:wrap;
+      text-align:left;
 
-}
+      background:#f8fafc;
 
+      border:
+        1px solid #e5e7eb;
 
-button{
+      border-radius:14px;
 
-  border:0;
+    }
 
-  border-radius:10px;
 
-  padding:13px 20px;
+    .check{
 
-  font-size:15px;
+      display:flex;
 
-  font-weight:800;
+      align-items:center;
 
-  cursor:pointer;
+      gap:9px;
 
-}
+      font-size:14px;
 
+    }
 
-button:disabled{
 
-  opacity:.45;
+    .check-icon{
 
-  cursor:not-allowed;
+      width:22px;
 
-}
+      height:22px;
 
+      border-radius:50%;
 
-.primary{
+      flex:0 0 auto;
 
-  background:#1d4ed8;
+      display:flex;
 
-  color:white;
+      align-items:center;
 
-}
+      justify-content:center;
 
+      background:#e5e7eb;
 
-.secondary{
+      color:#667085;
 
-  background:#e5e7eb;
+      font-size:12px;
 
-  color:#172033;
+      font-weight:800;
 
-}
+    }
 
 
-.success{
+    .check.ok .check-icon{
 
-  background:#15803d;
+      background:#dcfce7;
 
-  color:white;
+      color:#166534;
 
-}
+    }
 
 
-.error{
+    .check.bad .check-icon{
 
-  display:none;
+      background:#fee2e2;
 
-  margin-top:14px;
+      color:#991b1b;
 
-  padding:12px;
+    }
 
-  border-radius:10px;
 
-  background:#fee2e2;
+    /*
+     * ==========================================================
+     * BUTTONS
+     * ==========================================================
+     */
 
-  color:#991b1b;
+    .actions{
 
-}
+      display:flex;
 
+      justify-content:center;
 
-.status{
+      gap:10px;
 
-  margin-top:12px;
+      flex-wrap:wrap;
 
-  font-size:13px;
+    }
 
-  color:#667085;
 
-  min-height:20px;
+    button{
 
-}
+      border:0;
 
+      border-radius:10px;
 
-.ocr-box{
+      padding:13px 20px;
 
-  display:none;
+      font-size:15px;
 
-  margin-top:15px;
+      font-weight:800;
 
-  text-align:left;
+      cursor:pointer;
 
-  padding:12px;
+    }
 
-  background:#f8fafc;
 
-  border:1px solid #e5e7eb;
+    button:disabled{
 
-  border-radius:10px;
+      opacity:.45;
 
-  font-size:12px;
+      cursor:not-allowed;
 
-  max-height:120px;
+    }
 
-  overflow:auto;
 
-}
+    .primary{
 
-</style>
+      background:#1d4ed8;
+
+      color:white;
+
+    }
+
+
+    .secondary{
+
+      background:#e5e7eb;
+
+      color:#172033;
+
+    }
+
+
+    .success{
+
+      background:#15803d;
+
+      color:white;
+
+    }
+
+
+    /*
+     * ==========================================================
+     * STATUS
+     * ==========================================================
+     */
+
+    .status{
+
+      margin-top:12px;
+
+      min-height:20px;
+
+      font-size:13px;
+
+      color:#667085;
+
+    }
+
+
+    .error{
+
+      display:none;
+
+      margin-top:14px;
+
+      padding:12px;
+
+      border-radius:10px;
+
+      background:#fee2e2;
+
+      color:#991b1b;
+
+      font-size:14px;
+
+    }
+
+
+    .ocr-box{
+
+      display:none;
+
+      margin-top:15px;
+
+      text-align:left;
+
+      padding:12px;
+
+      background:#f8fafc;
+
+      border:
+        1px solid #e5e7eb;
+
+      border-radius:10px;
+
+      font-size:12px;
+
+      max-height:150px;
+
+      overflow:auto;
+
+      white-space:pre-wrap;
+
+    }
+
+
+  </style>
 
 </head>
 
@@ -383,188 +511,241 @@ button:disabled{
 <div class="card">
 
 
-<h1>
-  Student ID Verification
-</h1>
+  <h1>
+    Student ID Verification
+  </h1>
 
 
-<p class="muted">
+  <p class="muted">
 
-  Place your actual school ID inside the guide.
+    Hold your physical Student ID in front of the camera.
 
-  Your name, Student ID number, and face must be visible.
+    The system will automatically detect, align, and capture the card.
 
-</p>
-
-
-<div class="camera-wrap">
+  </p>
 
 
-  <video
-    id="video"
-    autoplay
-    playsinline
-    muted
-  ></video>
+  <div class="camera-wrap">
 
 
-  <canvas
-    id="canvas"
-  ></canvas>
+    <video
+      id="video"
+      autoplay
+      playsinline
+      muted
+    ></video>
 
 
-  <img
-    id="capturedImage"
-    alt="Captured student ID"
-  >
+    <canvas
+      id="canvas"
+    ></canvas>
+
+
+    <img
+      id="capturedImage"
+      alt="Captured Student ID"
+    >
+
+
+    <div
+      id="scannerGuide"
+      class="scanner-guide"
+    >
+
+      <span
+        class="corner tl"
+      ></span>
+
+      <span
+        class="corner tr"
+      ></span>
+
+      <span
+        class="corner bl"
+      ></span>
+
+      <span
+        class="corner br"
+      ></span>
+
+    </div>
+
+
+  </div>
 
 
   <div
-    id="idGuide"
-    class="id-guide"
+    id="instruction"
+    class="instruction"
+  >
+    Starting camera...
+  </div>
+
+
+  <div class="subinstruction">
+
+    Hold the ID flat, vertically, and centered.
+    Do not cover the card.
+
+  </div>
+
+
+  <div class="check-list">
+
+
+    <div
+      id="checkCard"
+      class="check bad"
+    >
+
+      <span
+        class="check-icon"
+      >
+        !
+      </span>
+
+      <span>
+        Physical Student ID detected
+      </span>
+
+    </div>
+
+
+    <div
+      id="checkPosition"
+      class="check bad"
+    >
+
+      <span
+        class="check-icon"
+      >
+        !
+      </span>
+
+      <span>
+        ID centered and upright
+      </span>
+
+    </div>
+
+
+    <div
+      id="checkSize"
+      class="check bad"
+    >
+
+      <span
+        class="check-icon"
+      >
+        !
+      </span>
+
+      <span>
+        ID large and clearly visible
+      </span>
+
+    </div>
+
+
+    <div
+      id="checkLighting"
+      class="check bad"
+    >
+
+      <span
+        class="check-icon"
+      >
+        !
+      </span>
+
+      <span>
+        Sufficient lighting
+      </span>
+
+    </div>
+
+
+    <div
+      id="checkFace"
+      class="check bad"
+    >
+
+      <span
+        class="check-icon"
+      >
+        !
+      </span>
+
+      <span>
+        Face visible on the ID
+      </span>
+
+    </div>
+
+
+  </div>
+
+
+  <div class="actions">
+
+
+    <button
+      id="retakeButton"
+      class="secondary"
+      style="display:none;"
+      onclick="retakeID()"
+    >
+      Retake
+    </button>
+
+
+    <button
+      id="useButton"
+      class="success"
+      style="display:none;"
+      onclick="useID()"
+    >
+      Use This ID
+    </button>
+
+  </div>
+
+
+  <div
+    id="status"
+    class="status"
   ></div>
 
-</div>
 
-
-<div
-  id="instruction"
-  class="instruction"
->
-  Waiting for camera...
-</div>
-
-
-<div class="check-list">
-
-<div
-  id="checkCard"
-  class="check bad"
->
-  <span class="check-icon">!</span>
-
-  <span>
-    Physical Student ID detected
-  </span>
-</div>
   <div
-    id="checkFace"
-    class="check bad"
-  >
-
-    <span class="check-icon">!</span>
-
-    <span>
-      Student face visible
-    </span>
-
-  </div>
+    id="ocrBox"
+    class="ocr-box"
+  ></div>
 
 
   <div
-    id="checkLighting"
-    class="check bad"
-  >
-
-    <span class="check-icon">!</span>
-
-    <span>
-      Sufficient lighting
-    </span>
-
-  </div>
-
-
-  <div
-    id="checkName"
-    class="check bad"
-  >
-
-    <span class="check-icon">!</span>
-
-    <span>
-      Student name detected
-    </span>
-
-  </div>
-
-
-  <div
-    id="checkId"
-    class="check bad"
-  >
-
-    <span class="check-icon">!</span>
-
-    <span>
-      Student ID number detected
-    </span>
-
-  </div>
-
-</div>
-
-
-<div class="actions">
-
-
-  <button
-    id="captureButton"
-    class="primary"
-    disabled
-    onclick="captureID()"
-  >
-    Capture Student ID
-  </button>
-
-
-  <button
-    id="retakeButton"
-    class="secondary"
-    style="display:none;"
-    onclick="retakeID()"
-  >
-    Retake
-  </button>
-
-
-  <button
-    id="useButton"
-    class="success"
-    style="display:none;"
-    onclick="useID()"
-  >
-    Use This ID
-  </button>
-
-</div>
-
-
-<div
-  id="status"
-  class="status"
-></div>
-
-
-<div
-  id="ocrBox"
-  class="ocr-box"
-></div>
-
-
-<div
-  id="error"
-  class="error"
-></div>
+    id="error"
+    class="error"
+  ></div>
 
 
 </div>
 
+
+<!-- ==========================================================
+     OCR
+     ========================================================== -->
 
 <script
   src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"
 ></script>
-  <script
+
+
+<!-- ==========================================================
+     OPENCV
+     ========================================================== -->
+
+<script
   async
   src="https://docs.opencv.org/4.x/opencv.js"
 ></script>
@@ -580,11 +761,15 @@ import {
   FaceLandmarker
 
 }
-
 from
-
 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304';
 
+
+/*
+ * ==========================================================
+ * GLOBALS
+ * ==========================================================
+ */
 
 let stream = null;
 
@@ -600,12 +785,25 @@ let expectedStudentId = '';
 
 let capturedData = null;
 
-let currentCardDetected = false;
-let currentFaceDetected = false;
-let currentLightingOK = false;
-let currentNameDetected = false;
-let currentIdDetected = false;
 
+/*
+ * Document state
+ */
+
+let detectedCard = null;
+
+let previousCard = null;
+
+let stableFrames = 0;
+
+let autoCaptured = false;
+
+
+/*
+ * ==========================================================
+ * ELEMENTS
+ * ==========================================================
+ */
 
 const video =
   document.getElementById(
@@ -625,15 +823,9 @@ const capturedImage =
   );
 
 
-const idGuide =
+const scannerGuide =
   document.getElementById(
-    'idGuide'
-  );
-
-
-const captureButton =
-  document.getElementById(
-    'captureButton'
+    'scannerGuide'
   );
 
 
@@ -661,7 +853,15 @@ const status =
   );
 
 
-function showError(message){
+/*
+ * ==========================================================
+ * ERROR
+ * ==========================================================
+ */
+
+function showError(
+  message
+){
 
   const el =
     document.getElementById(
@@ -689,6 +889,12 @@ function clearError(){
 
 }
 
+
+/*
+ * ==========================================================
+ * CHECK UI
+ * ==========================================================
+ */
 
 function setCheck(
   id,
@@ -725,195 +931,61 @@ function setCheck(
 }
 
 
-function updateLiveChecks(){
+/*
+ * ==========================================================
+ * WAIT FOR OPENCV
+ * ==========================================================
+ */
 
-  setCheck(
-    'checkCard',
-    currentCardDetected
+function waitForOpenCV(){
+
+  return new Promise(
+    function(resolve){
+
+      const timer =
+        setInterval(
+          function(){
+
+            if(
+              window.cv &&
+              cv.Mat &&
+              cv.getBuildInformation
+            ){
+
+              clearInterval(
+                timer
+              );
+
+              resolve();
+
+            }
+
+          },
+          100
+        );
+
+    }
   );
 
-
-  setCheck(
-    'checkFace',
-    currentFaceDetected
-  );
+}
 
 
-  setCheck(
-    'checkLighting',
-    currentLightingOK
-  );
+/*
+ * ==========================================================
+ * LIGHTING
+ * ==========================================================
+ */
 
-
-  /*
-   * Capture is NOT allowed just because
-   * a face exists.
-   *
-   * The physical ID must also be detected.
-   */
-
-  const ready =
-    currentCardDetected &&
-    currentFaceDetected &&
-    currentLightingOK;
-
-
-  captureButton.disabled =
-    !ready;
-
-
-  idGuide.classList.toggle(
-    'ready',
-    ready
-  );
-
+function checkLighting(){
 
   if(
-    !currentCardDetected
-  ){
-
-    instruction.textContent =
-      'Place your physical Student ID vertically inside the guide.';
-
-  }
-
-  else if(
-    !currentFaceDetected
-  ){
-
-    instruction.textContent =
-      'Make sure the face printed on the Student ID is clearly visible.';
-
-  }
-
-  else if(
-    !currentLightingOK
-  ){
-
-    instruction.textContent =
-      'Move to a brighter area so the ID can be clearly read.';
-
-  }
-
-  else{
-
-    instruction.textContent =
-      'Student ID detected. Keep it steady and capture the ID.';
-
-  }
-
-}
-
-
-function normalizeText(text){
-
-  return String(
-    text || ''
-  )
-  .toUpperCase()
-  .replace(
-    /[^A-Z0-9\s]/g,
-    ' '
-  )
-  .replace(
-    /\s+/g,
-    ' '
-  )
-  .trim();
-
-}
-
-
-function normalizeCompact(text){
-
-  return normalizeText(
-    text
-  )
-  .replace(
-    /\s/g,
-    ''
-  );
-
-}
-
-
-function nameFound(
-  text
-){
-
-  const ocr =
-    normalizeText(
-      text
-    );
-
-
-  const expected =
-    normalizeText(
-      expectedName
-    );
-
-
-  const tokens =
-    expected
-      .split(' ')
-      .filter(
-        token =>
-          token.length >= 2
-      );
-
-
-  if(
-    !tokens.length
+    !video.videoWidth
   ){
 
     return false;
 
   }
 
-
-  return tokens.every(
-    token =>
-      ocr.indexOf(
-        token
-      ) !== -1
-  );
-
-}
-
-
-function studentIdFound(
-  text
-){
-
-  const ocr =
-    normalizeCompact(
-      text
-    );
-
-
-  const expected =
-    normalizeCompact(
-      expectedStudentId
-    );
-
-
-  if(
-    !expected
-  ){
-
-    return false;
-
-  }
-
-
-  return ocr.indexOf(
-    expected
-  ) !== -1;
-
-}
-
-
-function getLighting(){
 
   const c =
     document.createElement(
@@ -921,11 +993,8 @@ function getLighting(){
     );
 
 
-  c.width =
-    60;
-
-  c.height =
-    60;
+  c.width = 60;
+  c.height = 60;
 
 
   const ctx =
@@ -952,8 +1021,7 @@ function getLighting(){
     ).data;
 
 
-  let total =
-    0;
+  let total = 0;
 
 
   for(
@@ -963,65 +1031,75 @@ function getLighting(){
   ){
 
     total +=
+
       (
         0.299 * pixels[i] +
-        0.587 * pixels[i+1] +
-        0.114 * pixels[i+2]
+        0.587 * pixels[i + 1] +
+        0.114 * pixels[i + 2]
       );
 
   }
 
 
   return (
+
     total /
     (pixels.length / 4)
+
   ) >= 45;
 
 }
 
-function detectStudentIDCard(){
+
+/*
+ * ==========================================================
+ * OPENCV CARD DETECTION
+ * ==========================================================
+ */
+
+function detectDocument(){
 
   if(
-    typeof cv === 'undefined' ||
+    !window.cv ||
     !cv.Mat ||
-    !video.videoWidth
+    !video.videoWidth ||
+    !video.videoHeight
   ){
 
-    return false;
+    return null;
 
   }
 
 
-  const source =
-    new cv.Mat(
-      video.videoHeight,
-      video.videoWidth,
-      cv.CV_8UC4
-    );
+  /*
+   * Copy current video frame.
+   */
 
-
-  const canvas =
+  const tempCanvas =
     document.createElement(
       'canvas'
     );
 
 
-  canvas.width =
+  tempCanvas.width =
     video.videoWidth;
 
-  canvas.height =
+  tempCanvas.height =
     video.videoHeight;
 
 
   const ctx =
-    canvas.getContext('2d');
+    tempCanvas.getContext(
+      '2d'
+    );
+
 
   ctx.drawImage(
     video,
     0,
     0,
-    canvas.width,
-    canvas.height
+    tempCanvas.width,
+    tempCanvas.height
   );
 
 
@@ -1029,21 +1107,22 @@ function detectStudentIDCard(){
     ctx.getImageData(
       0,
       0,
-      canvas.width,
-      canvas.height
+      tempCanvas.width,
+      tempCanvas.height
     );
 
 
-  source.data.set(
-    imageData.data
-  );
+  const src =
+    cv.matFromImageData(
+      imageData
+    );
 
 
   const gray =
     new cv.Mat();
 
 
-  const blurred =
+  const blur =
     new cv.Mat();
 
 
@@ -1059,30 +1138,49 @@ function detectStudentIDCard(){
     new cv.Mat();
 
 
+  let best = null;
+
+
   try{
 
+    /*
+     * Grayscale
+     */
+
     cv.cvtColor(
-      source,
+      src,
       gray,
       cv.COLOR_RGBA2GRAY
     );
 
 
+    /*
+     * Smooth noise
+     */
+
     cv.GaussianBlur(
       gray,
-      blurred,
+      blur,
       new cv.Size(5,5),
       0
     );
 
 
+    /*
+     * Edge detection
+     */
+
     cv.Canny(
-      blurred,
+      blur,
       edges,
-      50,
-      150
+      60,
+      160
     );
 
+
+    /*
+     * Find outer contours
+     */
 
     cv.findContours(
       edges,
@@ -1098,14 +1196,6 @@ function detectStudentIDCard(){
       video.videoHeight;
 
 
-    let bestArea =
-      0;
-
-
-    let bestRatio =
-      0;
-
-
     for(
       let i = 0;
       i < contours.size();
@@ -1114,6 +1204,30 @@ function detectStudentIDCard(){
 
       const contour =
         contours.get(i);
+
+
+      const area =
+        Math.abs(
+          cv.contourArea(
+            contour
+          )
+        );
+
+
+      /*
+       * Ignore tiny objects.
+       */
+
+      if(
+        area <
+        frameArea * 0.10
+      ){
+
+        contour.delete();
+
+        continue;
+
+      }
 
 
       const perimeter =
@@ -1130,57 +1244,221 @@ function detectStudentIDCard(){
       cv.approxPolyDP(
         contour,
         approx,
-        0.03 * perimeter,
+        0.025 * perimeter,
         true
       );
 
+
+      /*
+       * A document should have
+       * four corners.
+       */
 
       if(
         approx.rows === 4
       ){
 
-        const rect =
-          cv.boundingRect(
+        const points =
+          extractPoints(
             approx
           );
 
 
-        const area =
-          rect.width *
-          rect.height;
+        if(
+          !points
+        ){
 
+          approx.delete();
 
-        const ratio =
-          rect.width /
-          rect.height;
+          contour.delete();
+
+          continue;
+
+        }
 
 
         /*
-         * We specifically want a
-         * portrait/vertical card.
+         * Order corners:
+         * TL TR BR BL
          */
 
-        const verticalCard =
-          ratio >= 0.45 &&
-          ratio <= 0.85;
-
-
-        const largeEnough =
-          area >
-          frameArea * 0.12;
+        const ordered =
+          orderPoints(
+            points
+          );
 
 
         if(
-          verticalCard &&
-          largeEnough &&
-          area > bestArea
+          !ordered
         ){
 
-          bestArea =
-            area;
+          approx.delete();
 
-          bestRatio =
-            ratio;
+          contour.delete();
+
+          continue;
+
+        }
+
+
+        const widthTop =
+          distance(
+            ordered[0],
+            ordered[1]
+          );
+
+
+        const widthBottom =
+          distance(
+            ordered[3],
+            ordered[2]
+          );
+
+
+        const heightLeft =
+          distance(
+            ordered[0],
+            ordered[3]
+          );
+
+
+        const heightRight =
+          distance(
+            ordered[1],
+            ordered[2]
+          );
+
+
+        const width =
+          (
+            widthTop +
+            widthBottom
+          ) / 2;
+
+
+        const height =
+          (
+            heightLeft +
+            heightRight
+          ) / 2;
+
+
+        if(
+          width <= 0 ||
+          height <= 0
+        ){
+
+          approx.delete();
+
+          contour.delete();
+
+          continue;
+
+        }
+
+
+        const ratio =
+          width /
+          height;
+
+
+        /*
+         * Vertical Student ID.
+         */
+
+        const portrait =
+          ratio >= 0.45 &&
+          ratio <= 0.82;
+
+
+        /*
+         * Card must be substantial.
+         */
+
+        const areaRatio =
+          area /
+          frameArea;
+
+
+        const largeEnough =
+          areaRatio >= 0.14;
+
+
+        /*
+         * Card center.
+         */
+
+        const centerX =
+          (
+            ordered[0].x +
+            ordered[1].x +
+            ordered[2].x +
+            ordered[3].x
+          ) / 4;
+
+
+        const centerY =
+          (
+            ordered[0].y +
+            ordered[1].y +
+            ordered[2].y +
+            ordered[3].y
+          ) / 4;
+
+
+        const normalizedX =
+          centerX /
+          video.videoWidth;
+
+
+        const normalizedY =
+          centerY /
+          video.videoHeight;
+
+
+        const centered =
+          normalizedX >= 0.30 &&
+          normalizedX <= 0.70 &&
+          normalizedY >= 0.28 &&
+          normalizedY <= 0.72;
+
+
+        /*
+         * Keep the best card.
+         */
+
+        if(
+          portrait &&
+          largeEnough &&
+          centered
+        ){
+
+          const score =
+            areaRatio;
+
+          if(
+            !best ||
+            score >
+            best.score
+          ){
+
+            best = {
+
+              points:
+                ordered,
+
+              score:
+                score,
+
+              ratio:
+                ratio,
+
+              areaRatio:
+                areaRatio
+
+            };
+
+          }
 
         }
 
@@ -1194,53 +1472,311 @@ function detectStudentIDCard(){
     }
 
 
-    return (
-      bestArea >
-      frameArea * 0.12 &&
-      bestRatio >= 0.45 &&
-      bestRatio <= 0.85
-    );
-
   }
   finally{
 
-    source.delete();
+    src.delete();
     gray.delete();
-    blurred.delete();
+    blur.delete();
     edges.delete();
     contours.delete();
     hierarchy.delete();
 
   }
 
+
+  return best;
+
 }
-function processFrame(result){
-
-  const faces =
-    result.faceLandmarks || [];
 
 
-  currentFaceDetected =
-    faces.length === 1;
+/*
+ * ==========================================================
+ * EXTRACT CONTOUR POINTS
+ * ==========================================================
+ */
+
+function extractPoints(
+  approx
+){
+
+  if(
+    approx.rows !== 4
+  ){
+
+    return null;
+
+  }
 
 
-  currentLightingOK =
-    getLighting();
+  const points = [];
+
+
+  for(
+    let i = 0;
+    i < 4;
+    i++
+  ){
+
+    points.push({
+
+      x:
+        approx.intAt(
+          i,
+          0
+        ),
+
+      y:
+        approx.intAt(
+          i,
+          1
+        )
+
+    });
+
+  }
+
+
+  return points;
+
+}
+
+
+/*
+ * ==========================================================
+ * ORDER CORNERS
+ * ==========================================================
+ */
+
+function orderPoints(
+  points
+){
+
+  if(
+    points.length !== 4
+  ){
+
+    return null;
+
+  }
+
+
+  const sums =
+    points.map(
+      p =>
+        p.x + p.y
+    );
+
+
+  const diffs =
+    points.map(
+      p =>
+        p.x - p.y
+    );
+
+
+  const tlIndex =
+    sums.indexOf(
+      Math.min(
+        ...sums
+      )
+    );
+
+
+  const brIndex =
+    sums.indexOf(
+      Math.max(
+        ...sums
+      )
+    );
+
+
+  const trIndex =
+    diffs.indexOf(
+      Math.max(
+        ...diffs
+      )
+    );
+
+
+  const blIndex =
+    diffs.indexOf(
+      Math.min(
+        ...diffs
+      )
+    );
+
+
+  return [
+
+    points[tlIndex],
+    points[trIndex],
+    points[brIndex],
+    points[blIndex]
+
+  ];
+
+}
+
+
+/*
+ * ==========================================================
+ * DISTANCE
+ * ==========================================================
+ */
+
+function distance(
+  a,
+  b
+){
+
+  return Math.sqrt(
+
+    Math.pow(
+      b.x - a.x,
+      2
+    ) +
+
+    Math.pow(
+      b.y - a.y,
+      2
+    )
+
+  );
+
+}
+
+
+/*
+ * ==========================================================
+ * CARD STABILITY
+ * ==========================================================
+ */
+
+function isStable(
+  current
+){
+
+  if(
+    !previousCard
+  ){
+
+    previousCard =
+      current;
+
+    stableFrames =
+      0;
+
+    return false;
+
+  }
+
+
+  const currentCenter = {
+
+    x:
+      (
+        current.points[0].x +
+        current.points[1].x +
+        current.points[2].x +
+        current.points[3].x
+      ) / 4,
+
+    y:
+      (
+        current.points[0].y +
+        current.points[1].y +
+        current.points[2].y +
+        current.points[3].y
+      ) / 4
+
+  };
+
+
+  const previousCenter = {
+
+    x:
+      (
+        previousCard.points[0].x +
+        previousCard.points[1].x +
+        previousCard.points[2].x +
+        previousCard.points[3].x
+      ) / 4,
+
+    y:
+      (
+        previousCard.points[0].y +
+        previousCard.points[1].y +
+        previousCard.points[2].y +
+        previousCard.points[3].y
+      ) / 4
+
+  };
+
+
+  const centerMovement =
+    Math.sqrt(
+
+      Math.pow(
+        currentCenter.x -
+        previousCenter.x,
+        2
+      ) +
+
+      Math.pow(
+        currentCenter.y -
+        previousCenter.y,
+        2
+      )
+
+    );
 
 
   /*
-   * Detect the actual physical ID card.
+   * Allow small hand movement,
+   * but require stability.
    */
 
-  currentCardDetected =
-    detectStudentIDCard();
-function faceIsInsideCard(
-  landmarks
+  if(
+    centerMovement <
+    12
+  ){
+
+    stableFrames++;
+
+  }
+  else{
+
+    stableFrames = 0;
+
+  }
+
+
+  previousCard =
+    current;
+
+
+  return (
+    stableFrames >= 8
+  );
+
+}
+
+
+/*
+ * ==========================================================
+ * CARD FACE DETECTION
+ * ==========================================================
+ */
+
+function faceInsideCard(
+  landmarks,
+  card
 ){
 
   if(
     !landmarks ||
-    !landmarks.length
+    !card
   ){
 
     return false;
@@ -1248,102 +1784,1273 @@ function faceIsInsideCard(
   }
 
 
-  /*
-   * Face center.
-   */
-
-  let totalX = 0;
-  let totalY = 0;
+  let minX = 1;
+  let maxX = 0;
+  let minY = 1;
+  let maxY = 0;
 
 
   landmarks.forEach(
     function(point){
 
-      totalX +=
-        point.x;
+      minX =
+        Math.min(
+          minX,
+          point.x
+        );
 
-      totalY +=
-        point.y;
+
+      maxX =
+        Math.max(
+          maxX,
+          point.x
+        );
+
+
+      minY =
+        Math.min(
+          minY,
+          point.y
+        );
+
+
+      maxY =
+        Math.max(
+          maxY,
+          point.y
+        );
 
     }
   );
 
 
-  const faceX =
-    totalX /
-    landmarks.length;
+  const center = {
 
+    x:
+      (minX + maxX) / 2,
 
-  const faceY =
-    totalY /
-    landmarks.length;
+    y:
+      (minY + maxY) / 2
+
+  };
 
 
   /*
-   * Approximate card location.
-   *
-   * This assumes the vertical ID is
-   * held near the center of the
-   * camera frame, matching the guide.
+   * Convert card points to normalized
+   * screen coordinates.
    */
 
-  const cardLeft =
-    0.20;
+  const cardPoints =
+    card.points.map(
+      p => ({
 
-  const cardRight =
-    0.80;
+        x:
+          p.x /
+          video.videoWidth,
 
-  const cardTop =
-    0.08;
+        y:
+          p.y /
+          video.videoHeight
 
-  const cardBottom =
-    0.92;
+      })
+    );
 
 
-  return (
-    faceX >= cardLeft &&
-    faceX <= cardRight &&
-    faceY >= cardTop &&
-    faceY <= cardBottom
+  return pointInPolygon(
+    center,
+    cardPoints
   );
 
 }
 
-  /*
-   * A face only counts if there is
-   * also a detected ID card.
-   */
 
-  if(
-    currentCardDetected &&
-    currentFaceDetected
+/*
+ * ==========================================================
+ * POINT IN QUAD
+ * ==========================================================
+ */
+
+function pointInPolygon(
+  point,
+  polygon
+){
+
+  let inside = false;
+
+
+  for(
+    let i = 0,
+    j = polygon.length - 1;
+
+    i < polygon.length;
+
+    j = i++
   ){
 
-    currentFaceDetected =
-      faceIsInsideCard(
-        faces[0]
-      );
+    const xi =
+      polygon[i].x;
+
+    const yi =
+      polygon[i].y;
+
+    const xj =
+      polygon[j].x;
+
+    const yj =
+      polygon[j].y;
+
+
+    const intersect =
+
+      (
+        yi > point.y
+      ) !==
+      (
+        yj > point.y
+      )
+
+      &&
+
+      point.x <
+
+      (
+        xj - xi
+      )
+
+      *
+
+      (
+        point.y - yi
+      )
+
+      /
+
+      (
+        yj - yi
+      )
+
+      +
+
+      xi;
+
+
+    if(
+      intersect
+    ){
+
+      inside =
+        !inside;
+
+    }
 
   }
-  else{
-
-    currentFaceDetected =
-      false;
-
-  }
 
 
-  updateLiveChecks();
+  return inside;
 
 }
 
+
+/*
+ * ==========================================================
+ * DRAW PERSPECTIVE-CORRECTED CARD
+ * ==========================================================
+ */
+
+function captureCorrectedDocument(
+  card
+){
+
+  const tl =
+    card.points[0];
+
+  const tr =
+    card.points[1];
+
+  const br =
+    card.points[2];
+
+  const bl =
+    card.points[3];
+
+
+  const widthTop =
+    distance(
+      tl,
+      tr
+    );
+
+
+  const widthBottom =
+    distance(
+      bl,
+      br
+    );
+
+
+  const heightLeft =
+    distance(
+      tl,
+      bl
+    );
+
+
+  const heightRight =
+    distance(
+      tr,
+      br
+    );
+
+
+  const outputWidth =
+    Math.round(
+      Math.max(
+        widthTop,
+        widthBottom
+      )
+    );
+
+
+  const outputHeight =
+    Math.round(
+      Math.max(
+        heightLeft,
+        heightRight
+      )
+    );
+
+
+  const srcCanvas =
+    document.createElement(
+      'canvas'
+    );
+
+
+  srcCanvas.width =
+    video.videoWidth;
+
+  srcCanvas.height =
+    video.videoHeight;
+
+
+  const srcCtx =
+    srcCanvas.getContext(
+      '2d'
+    );
+
+
+  srcCtx.drawImage(
+    video,
+    0,
+    0,
+    srcCanvas.width,
+    srcCanvas.height
+  );
+
+
+  const imageData =
+    srcCtx.getImageData(
+      0,
+      0,
+      srcCanvas.width,
+      srcCanvas.height
+    );
+
+
+  const src =
+    cv.matFromImageData(
+      imageData
+    );
+
+
+  const dst =
+    new cv.Mat();
+
+
+  const srcPoints =
+    cv.matFromArray(
+      4,
+      1,
+      cv.CV_32FC2,
+      [
+
+        tl.x,
+        tl.y,
+
+        tr.x,
+        tr.y,
+
+        br.x,
+        br.y,
+
+        bl.x,
+        bl.y
+
+      ]
+    );
+
+
+  const dstPoints =
+    cv.matFromArray(
+      4,
+      1,
+      cv.CV_32FC2,
+      [
+
+        0,
+        0,
+
+        outputWidth,
+        0,
+
+        outputWidth,
+        outputHeight,
+
+        0,
+        outputHeight
+
+      ]
+    );
+
+
+  const matrix =
+    cv.getPerspectiveTransform(
+      srcPoints,
+      dstPoints
+    );
+
+
+  cv.warpPerspective(
+
+    src,
+
+    dst,
+
+    matrix,
+
+    new cv.Size(
+      outputWidth,
+      outputHeight
+    )
+
+  );
+
+
+  const resultCanvas =
+    document.createElement(
+      'canvas'
+    );
+
+
+  resultCanvas.width =
+    outputWidth;
+
+  resultCanvas.height =
+    outputHeight;
+
+
+  cv.imshow(
+    resultCanvas,
+    dst
+  );
+
+
+  const result =
+    resultCanvas.toDataURL(
+      'image/jpeg',
+      0.95
+    );
+
+
+  src.delete();
+
+  dst.delete();
+
+  srcPoints.delete();
+
+  dstPoints.delete();
+
+  matrix.delete();
+
+
+  return result;
+
+}
+
+
+/*
+ * ==========================================================
+ * PROCESS FACE
+ * ==========================================================
+ */
+
+function processFace(
+  result,
+  card
+){
+
+  const faces =
+    result.faceLandmarks ||
+    [];
+
+
+  let faceDetected =
+    false;
+
+
+  if(
+    faces.length === 1 &&
+    card
+  ){
+
+    faceDetected =
+      faceInsideCard(
+        faces[0],
+        card
+      );
+
+  }
+
+
+  setCheck(
+    'checkFace',
+    faceDetected
+  );
+
+
+  setCheck(
+    'checkCard',
+    !!card
+  );
+
+
+  const lighting =
+    checkLighting();
+
+
+  setCheck(
+    'checkLighting',
+    lighting
+  );
+
+
+  /*
+   * Position and size come from
+   * the card detector itself.
+   */
+
+  const positionOK =
+    !!card;
+
+
+  setCheck(
+    'checkPosition',
+    positionOK
+  );
+
+
+  let sizeOK =
+    false;
+
+
+  if(card){
+
+    sizeOK =
+      card.areaRatio >=
+      0.18;
+
+  }
+
+
+  setCheck(
+    'checkSize',
+    sizeOK
+  );
+
+
+  const ready =
+    !!card &&
+    positionOK &&
+    sizeOK &&
+    lighting &&
+    faceDetected;
+
+
+  scannerGuide.classList.toggle(
+    'ready',
+    ready
+  );
+
+
+  if(
+    !card
+  ){
+
+    instruction.textContent =
+      'Move your physical Student ID to the center of the guide.';
+
+    stableFrames =
+      0;
+
+    previousCard =
+      null;
+
+    return;
+
+  }
+
+
+  if(
+    !positionOK
+  ){
+
+    instruction.textContent =
+      'Center the Student ID.';
+
+    return;
+
+  }
+
+
+  if(
+    !sizeOK
+  ){
+
+    instruction.textContent =
+      'Move the Student ID closer.';
+
+    return;
+
+  }
+
+
+  if(
+    !lighting
+  ){
+
+    instruction.textContent =
+      'Move to a brighter area.';
+
+    return;
+
+  }
+
+
+  if(
+    !faceDetected
+  ){
+
+    instruction.textContent =
+      'Make sure the photo printed on the ID is visible.';
+
+    return;
+
+  }
+
+
+  if(
+    isStable(card)
+  ){
+
+    if(
+      !autoCaptured
+    ){
+
+      autoCaptured =
+        true;
+
+      instruction.textContent =
+        'ID detected. Capturing...';
+
+      setTimeout(
+        function(){
+
+          autoCapture(
+            card
+          );
+
+        },
+        120
+      );
+
+    }
+
+    return;
+
+  }
+
+
+  instruction.textContent =
+    'Hold the ID steady...';
+
+}
+
+
+/*
+ * ==========================================================
+ * AUTO CAPTURE
+ * ==========================================================
+ */
+
+function autoCapture(
+  card
+){
+
+  clearError();
+
+
+  let corrected;
+
+
+  try{
+
+    corrected =
+      captureCorrectedDocument(
+        card
+      );
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    autoCaptured =
+      false;
+
+    stableFrames =
+      0;
+
+    showError(
+      'The ID could not be captured. Please try again.'
+    );
+
+    return;
+
+  }
+
+
+  capturedData =
+    corrected;
+
+
+  capturedImage.src =
+    corrected;
+
+
+  capturedImage.style.display =
+    'block';
+
+
+  video.style.display =
+    'none';
+
+
+  scannerGuide.style.display =
+    'none';
+
+
+  retakeButton.style.display =
+    'inline-block';
+
+
+  status.textContent =
+    'Student ID captured. Checking the document...';
+
+
+  runOCR(
+    corrected
+  );
+
+}
+
+
+/*
+ * ==========================================================
+ * OCR
+ * ==========================================================
+ */
+
+async function runOCR(
+  image
+){
+
+  setCheck(
+    'checkCard',
+    true
+  );
+
+
+  setCheck(
+    'checkPosition',
+    true
+  );
+
+
+  setCheck(
+    'checkSize',
+    true
+  );
+
+
+  setCheck(
+    'checkLighting',
+    true
+  );
+
+
+  try{
+
+    const worker =
+      await Tesseract.createWorker(
+        'eng',
+        1
+      );
+
+
+    const result =
+      await worker.recognize(
+        image
+      );
+
+
+    const text =
+      result.data.text ||
+      '';
+
+
+    await worker.terminate();
+
+
+    const normalized =
+      normalizeText(
+        text
+      );
+
+
+    const expectedNameNormalized =
+      normalizeText(
+        expectedName
+      );
+
+
+    const expectedIdNormalized =
+      normalizeCompact(
+        expectedStudentId
+      );
+
+
+    const nameParts =
+      expectedNameNormalized
+        .split(' ')
+        .filter(
+          part =>
+            part.length >= 2
+        );
+
+
+    const nameOK =
+      nameParts.length > 0 &&
+      nameParts.every(
+        part =>
+          normalized.indexOf(
+            part
+          ) !== -1
+      );
+
+
+    const idOK =
+      expectedIdNormalized &&
+      normalizeCompact(
+        text
+      ).indexOf(
+        expectedIdNormalized
+      ) !== -1;
+
+
+    setCheck(
+      'checkFace',
+      true
+    );
+
+
+    /*
+     * Use OCR results to update
+     * verification message.
+     */
+
+    const ocrBox =
+      document.getElementById(
+        'ocrBox'
+      );
+
+
+    ocrBox.textContent =
+      text ||
+      'No readable text detected.';
+
+
+    ocrBox.style.display =
+      'block';
+
+
+    if(
+      nameOK &&
+      idOK
+    ){
+
+      status.textContent =
+        'Student ID verified. Review the corrected scan before confirming.';
+
+      useButton.style.display =
+        'inline-block';
+
+    }
+    else{
+
+      status.textContent =
+        'The scan was captured, but the required name or Student ID could not be verified. Please retake.';
+
+    }
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    status.textContent =
+      'OCR could not read the Student ID. Please retake.';
+
+  }
+
+}
+
+
+/*
+ * ==========================================================
+ * NORMALIZATION
+ * ==========================================================
+ */
+
+function normalizeText(
+  text
+){
+
+  return String(
+    text || ''
+  )
+
+  .toUpperCase()
+
+  .replace(
+    /[^A-Z0-9\s]/g,
+    ' '
+  )
+
+  .replace(
+    /\s+/g,
+    ' '
+  )
+
+  .trim();
+
+}
+
+
+function normalizeCompact(
+  text
+){
+
+  return normalizeText(
+    text
+  )
+
+  .replace(
+    /\s/g,
+    ''
+  );
+
+}
+
+
+/*
+ * ==========================================================
+ * RETAKE
+ * ==========================================================
+ */
+
+function retakeID(){
+
+  capturedData =
+    null;
+
+  autoCaptured =
+    false;
+
+  stableFrames =
+    0;
+
+  previousCard =
+    null;
+
+
+  capturedImage.style.display =
+    'none';
+
+
+  video.style.display =
+    'block';
+
+
+  scannerGuide.style.display =
+    'block';
+
+
+  retakeButton.style.display =
+    'none';
+
+
+  useButton.style.display =
+    'none';
+
+
+  document.getElementById(
+    'ocrBox'
+  ).style.display =
+    'none';
+
+
+  status.textContent =
+    '';
+
+
+  instruction.textContent =
+    'Position your physical Student ID inside the guide.';
+
+
+  setCheck(
+    'checkCard',
+    false
+  );
+
+
+  setCheck(
+    'checkPosition',
+    false
+  );
+
+
+  setCheck(
+    'checkSize',
+    false
+  );
+
+
+  setCheck(
+    'checkLighting',
+    false
+  );
+
+
+  setCheck(
+    'checkFace',
+    false
+  );
+
+}
+
+
+/*
+ * ==========================================================
+ * USE ID
+ * ==========================================================
+ */
+
+function useID(){
+
+  clearError();
+
+
+  if(
+    !capturedData
+  ){
+
+    showError(
+      'No Student ID photo was captured.'
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * Name + ID must have passed OCR.
+   */
+
+  const ocrText =
+    document
+      .getElementById(
+        'ocrBox'
+      )
+      .textContent || '';
+
+
+  const normalized =
+    normalizeText(
+      ocrText
+    );
+
+
+  const nameParts =
+    normalizeText(
+      expectedName
+    )
+    .split(' ')
+    .filter(
+      part =>
+        part.length >= 2
+    );
+
+
+  const nameOK =
+    nameParts.length > 0 &&
+    nameParts.every(
+      part =>
+        normalized.indexOf(
+          part
+        ) !== -1
+    );
+
+
+  const idOK =
+    normalizeCompact(
+      ocrText
+    ).indexOf(
+      normalizeCompact(
+        expectedStudentId
+      )
+    ) !== -1;
+
+
+  if(
+    !nameOK ||
+    !idOK
+  ){
+
+    showError(
+      'The Student ID could not be verified. Please retake the photo and make sure the name and Student ID number are clearly visible.'
+    );
+
+    return;
+
+  }
+
+
+  if(
+    window.opener
+  ){
+
+    window.opener.postMessage(
+
+      {
+
+        type:
+          'STUDENT_ID_CAPTURED',
+
+        image:
+          capturedData
+
+      },
+
+      '*'
+
+    );
+
+  }
+
+
+  status.textContent =
+    'Student ID accepted. Returning to the application...';
+
+
+  stopCamera();
+
+
+  setTimeout(
+    function(){
+
+      window.close();
+
+    },
+    700
+  );
+
+}
+
+
+/*
+ * ==========================================================
+ * CAMERA
+ * ==========================================================
+ */
+
+async function startCamera(){
+
+  try{
+
+    stream =
+      await navigator
+        .mediaDevices
+        .getUserMedia({
+
+          video:{
+
+            facingMode:
+              'user',
+
+            width:{
+              ideal:
+                1280
+            },
+
+            height:{
+              ideal:
+                720
+            }
+
+          },
+
+          audio:false
+
+        });
+
+
+    video.srcObject =
+      stream;
+
+
+    await video.play();
+
+
+    instruction.textContent =
+      'Move your physical Student ID into the center guide.';
+
+
+    detectLoop();
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    showError(
+      'Camera access was denied. Please allow camera permission and refresh the page.'
+    );
+
+  }
+
+}
+
+
+/*
+ * ==========================================================
+ * DETECTION LOOP
+ * ==========================================================
+ */
+
+function detectLoop(){
+
+  if(
+    autoCaptured
+  ){
+
+    return;
+
+  }
+
+
+  let card =
+    null;
+
+
+  try{
+
+    card =
+      detectDocument();
+
+  }
+  catch(error){
+
+    console.warn(
+      'Document detection error:',
+      error
+    );
+
+  }
+
+
+  detectedCard =
+    card;
+
+
+  if(
+    faceLandmarker &&
+    video.readyState >= 2 &&
+    video.currentTime !==
+      lastVideoTime
+  ){
+
+    lastVideoTime =
+      video.currentTime;
+
+
+    const result =
+      faceLandmarker.detectForVideo(
+
+        video,
+
+        performance.now()
+
+      );
+
+
+    processFace(
+      result,
+      card
+    );
+
+  }
+
+
+  animationFrameId =
+    requestAnimationFrame(
+      detectLoop
+    );
+
+}
+
+
+/*
+ * ==========================================================
+ * INITIALIZE
+ * ==========================================================
+ */
 
 async function initialize(){
 
   try{
 
     instruction.textContent =
-      'Loading face detection...';
+      'Loading document scanner...';
+
+
+    await waitForOpenCV();
 
 
     const vision =
@@ -1396,507 +3103,8 @@ async function initialize(){
     );
 
     showError(
-      'Unable to initialize ID verification.'
+      'Unable to initialize the Student ID scanner.'
     );
-
-  }
-
-}
-
-
-async function startCamera(){
-
-  try{
-
-    stream =
-      await navigator
-        .mediaDevices
-        .getUserMedia({
-
-          video:{
-
-            facingMode:
-              'user',
-
-            width:{
-              ideal:
-                1280
-            },
-
-            height:{
-              ideal:
-                720
-            }
-
-          },
-
-          audio:false
-
-        });
-
-
-    video.srcObject =
-      stream;
-
-
-    await video.play();
-
-
-    instruction.textContent =
-      'Position your face and Student ID inside the guide.';
-
-
-    detect();
-
-  }
-  catch(error){
-
-    console.error(
-      error
-    );
-
-    showError(
-      'Camera access was denied. Please allow camera access and refresh the page.'
-    );
-
-  }
-
-}
-
-
-function detect(){
-
-  if(
-    !faceLandmarker ||
-    !video.videoWidth
-  ){
-
-    animationFrameId =
-      requestAnimationFrame(
-        detect
-      );
-
-    return;
-
-  }
-
-
-  if(
-    video.currentTime !==
-    lastVideoTime
-  ){
-
-    lastVideoTime =
-      video.currentTime;
-
-
-    const result =
-      faceLandmarker.detectForVideo(
-        video,
-        performance.now()
-      );
-
-
-    processFrame(
-  result
-);
-
-  }
-
-
-  animationFrameId =
-    requestAnimationFrame(
-      detect
-    );
-
-}
-
-
-async function captureID(){
-
-  clearError();
-
-
-  if(
-    !currentFaceDetected ||
-    !currentLightingOK
-  ){
-
-    showError(
-      'Please make sure your face is visible and the lighting is sufficient.'
-    );
-
-    return;
-
-  }
-
-
-const sourceWidth =
-  video.videoWidth;
-
-const sourceHeight =
-  video.videoHeight;
-
-const targetHeight =
-  sourceWidth * 4 / 3;
-
-const cropHeight =
-  Math.min(
-    sourceHeight,
-    targetHeight
-  );
-
-const cropWidth =
-  cropHeight * 3 / 4;
-
-const sourceX =
-  (sourceWidth - cropWidth) / 2;
-
-const sourceY =
-  (sourceHeight - cropHeight) / 2;
-
-canvas.width =
-  cropWidth;
-
-canvas.height =
-  cropHeight;
-
-
-  const ctx =
-    canvas.getContext(
-      '2d'
-    );
-
-
- ctx.drawImage(
-
-  video,
-
-  sourceX,
-  sourceY,
-
-  cropWidth,
-  cropHeight,
-
-  0,
-  0,
-
-  cropWidth,
-  cropHeight
-
-);
-
-
-  capturedData =
-    canvas.toDataURL(
-      'image/jpeg',
-      0.92
-    );
-
-
-  capturedImage.src =
-    capturedData;
-
-
-  capturedImage.style.display =
-    'block';
-
-
-  video.style.display =
-    'none';
-
-
-  idGuide.style.display =
-    'none';
-
-
-  captureButton.style.display =
-    'none';
-
-
-  retakeButton.style.display =
-    'inline-block';
-
-
-  status.textContent =
-    'Reading the Student ID...';
-
-
-  currentNameDetected =
-    false;
-
-
-  currentIdDetected =
-    false;
-
-
-  setCheck(
-    'checkName',
-    false
-  );
-
-
-  setCheck(
-    'checkId',
-    false
-  );
-
-
-  useButton.style.display =
-    'none';
-
-
-  try{
-
-    const worker =
-      await Tesseract.createWorker(
-        'eng',
-        1
-      );
-
-
-    const result =
-      await worker.recognize(
-        capturedData
-      );
-
-
-    const text =
-      result.data.text || '';
-
-
-    await worker.terminate();
-
-
-    currentNameDetected =
-      nameFound(
-        text
-      );
-
-
-    currentIdDetected =
-      studentIdFound(
-        text
-      );
-
-
-    setCheck(
-      'checkName',
-      currentNameDetected
-    );
-
-
-    setCheck(
-      'checkId',
-      currentIdDetected
-    );
-
-
-    const ocrBox =
-      document.getElementById(
-        'ocrBox'
-      );
-
-
-    ocrBox.textContent =
-      text ||
-      'No readable text detected.';
-
-
-    ocrBox.style.display =
-      'block';
-
-
-    if(
-      currentNameDetected &&
-      currentIdDetected
-    ){
-
-      status.textContent =
-        'Student ID verified. Review the photo before confirming.';
-
-      useButton.style.display =
-        'inline-block';
-
-    }
-    else{
-
-      status.textContent =
-        'Verification failed. Retake the photo with the name and Student ID clearly visible.';
-
-      retakeButton.style.display =
-        'inline-block';
-
-    }
-
-  }
-  catch(error){
-
-    console.error(
-      error
-    );
-
-    status.textContent =
-      'OCR could not read the Student ID. Please retake the photo.';
-
-  }
-
-}
-
-
-function retakeID(){
-
-  capturedData =
-    null;
-
-
-  currentNameDetected =
-    false;
-
-  currentIdDetected =
-    false;
-
-
-  capturedImage.style.display =
-    'none';
-
-
-  video.style.display =
-    'block';
-
-
-  idGuide.style.display =
-    'block';
-
-
-  captureButton.style.display =
-    'inline-block';
-
-
-  retakeButton.style.display =
-    'none';
-
-
-  useButton.style.display =
-    'none';
-
-
-  document.getElementById(
-    'ocrBox'
-  ).style.display =
-    'none';
-
-
-  status.textContent =
-    '';
-
-
-  setCheck(
-    'checkName',
-    false
-  );
-
-
-  setCheck(
-    'checkId',
-    false
-  );
-
-
-  updateLiveChecks();
-
-}
-
-
-function useID(){
-
-  clearError();
-
-
-  if(
-    !capturedData ||
-    !currentNameDetected ||
-    !currentIdDetected
-  ){
-
-    showError(
-      'The Student ID has not passed verification.'
-    );
-
-    return;
-
-  }
-
-
-  if(
-    window.opener
-  ){
-
-    window.opener.postMessage(
-
-      {
-
-        type:
-          'STUDENT_ID_CAPTURED',
-
-        image:
-          capturedData
-
-      },
-
-      '*'
-
-    );
-
-  }
-
-
-  status.textContent =
-    'Student ID verified successfully. Returning to the application...';
-
-
-  stopCamera();
-
-
-  setTimeout(
-    function(){
-
-      window.close();
-
-    },
-    700
-  );
-
-}
-
-
-function stopCamera(){
-
-  if(
-    animationFrameId
-  ){
-
-    cancelAnimationFrame(
-      animationFrameId
-    );
-
-    animationFrameId =
-      null;
-
-  }
-
-
-  if(stream){
-
-    stream
-      .getTracks()
-      .forEach(
-        track =>
-          track.stop()
-      );
-
-    stream =
-      null;
 
   }
 
@@ -1904,7 +3112,9 @@ function stopCamera(){
 
 
 /*
- * Tell the parent that the camera page is ready.
+ * ==========================================================
+ * PARENT COMMUNICATION
+ * ==========================================================
  */
 
 window.addEventListener(
@@ -1931,11 +3141,6 @@ window.addEventListener(
   }
 );
 
-
-/*
- * Receive student name + ID from
- * the main application.
- */
 
 window.addEventListener(
   'message',
@@ -1970,12 +3175,61 @@ window.addEventListener(
 
 
       status.textContent =
-        'Verification is checking for the entered name and Student ID number.';
+        'Scanner ready for ' +
+        expectedName +
+        '.';
 
     }
 
   },
   false
+);
+
+
+/*
+ * ==========================================================
+ * STOP CAMERA
+ * ==========================================================
+ */
+
+function stopCamera(){
+
+  if(
+    animationFrameId
+  ){
+
+    cancelAnimationFrame(
+      animationFrameId
+    );
+
+    animationFrameId =
+      null;
+
+  }
+
+
+  if(
+    stream
+  ){
+
+    stream
+      .getTracks()
+      .forEach(
+        track =>
+          track.stop()
+      );
+
+    stream =
+      null;
+
+  }
+
+}
+
+
+window.addEventListener(
+  'beforeunload',
+  stopCamera
 );
 
 
