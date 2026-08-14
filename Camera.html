@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Parking ID Selfie</title>
+
+  <style>
+
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:#f4f7fb;
+      color:#172033;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .camera-card{
+      width:100%;
+      max-width:620px;
+      background:white;
+      border-radius:20px;
+      padding:22px;
+      box-shadow:0 10px 35px rgba(0,0,0,.12);
+      text-align:center;
+    }
+
+    h1{
+      margin-top:0;
+    }
+
+    .muted{
+      color:#667085;
+    }
+
+    .camera-frame{
+      position:relative;
+      width:100%;
+      aspect-ratio:3/4;
+      background:#111827;
+      border-radius:18px;
+      overflow:hidden;
+      margin:20px 0;
+    }
+
+    video,
+    canvas,
+    #capturedImage{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    video{
+      display:block;
+    }
+
+    canvas{
+      display:none;
+    }
+
+    #capturedImage{
+      display:none;
+    }
+
+    .face-guide{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:55%;
+      height:65%;
+      transform:translate(-50%,-50%);
+      border:3px solid white;
+      border-radius:50%;
+      box-shadow:0 0 0 9999px rgba(0,0,0,.25);
+      pointer-events:none;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:0;
+      border-radius:10px;
+      padding:13px 20px;
+      font-weight:700;
+      cursor:pointer;
+      font-size:15px;
+    }
+
+    .primary{
+      background:#1d4ed8;
+      color:white;
+    }
+
+    .secondary{
+      background:#e5e7eb;
+      color:#172033;
+    }
+
+    .success{
+      background:#15803d;
+      color:white;
+    }
+
+    .error{
+      background:#fee2e2;
+      color:#991b1b;
+      padding:12px;
+      border-radius:10px;
+      margin-top:12px;
+      display:none;
+    }
+
+    #approveSection{
+      display:none;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="camera-card">
+
+    <h1>Parking ID Selfie</h1>
+
+    <p class="muted">
+      Position your face inside the guide and take a clear photo.
+      This photo will be used for your Official Parking ID.
+    </p>
+
+    <div class="camera-frame">
+
+      <video
+        id="video"
+        autoplay
+        playsinline
+      ></video>
+
+      <canvas id="canvas"></canvas>
+
+      <img
+        id="capturedImage"
+        alt="Captured selfie"
+      >
+
+      <div
+        id="faceGuide"
+        class="face-guide"
+      ></div>
+
+    </div>
+
+    <div class="actions">
+
+      <button
+        id="takeButton"
+        class="primary"
+        onclick="takePhoto()"
+      >
+        Take Photo
+      </button>
+
+      <button
+        id="retakeButton"
+        class="secondary"
+        onclick="retakePhoto()"
+        style="display:none;"
+      >
+        Retake
+      </button>
+
+      <button
+        id="useButton"
+        class="success"
+        onclick="usePhoto()"
+        style="display:none;"
+      >
+        Use This Photo
+      </button>
+
+    </div>
+
+    <div
+      id="error"
+      class="error"
+    ></div>
+
+  </div>
+
+
+<script>
+
+let stream = null;
+let capturedData = null;
+
+
+function showError(message){
+
+  const el =
+    document.getElementById('error');
+
+  el.textContent =
+    message;
+
+  el.style.display =
+    'block';
+
+}
+
+
+function clearError(){
+
+  const el =
+    document.getElementById('error');
+
+  el.textContent =
+    '';
+
+  el.style.display =
+    'none';
+
+}
+
+
+async function startCamera(){
+
+  clearError();
+
+  try{
+
+    if(
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ){
+
+      throw new Error(
+        'Your browser does not support camera access.'
+      );
+
+    }
+
+    stream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video:{
+          facingMode:'user',
+          width:{
+            ideal:1280
+          },
+          height:{
+            ideal:1280
+          }
+        },
+
+        audio:false
+
+      });
+
+
+    const video =
+      document.getElementById(
+        'video'
+      );
+
+    video.srcObject =
+      stream;
+
+  }
+  catch(error){
+
+    showError(
+      'Camera access was denied or unavailable. Please allow camera permission and try again.'
+    );
+
+  }
+
+}
+
+
+function takePhoto(){
+
+  clearError();
+
+  const video =
+    document.getElementById(
+      'video'
+    );
+
+  const canvas =
+    document.getElementById(
+      'canvas'
+    );
+
+  if(
+    !stream ||
+    !video.videoWidth
+  ){
+
+    showError(
+      'Camera is not ready yet.'
+    );
+
+    return;
+
+  }
+
+
+  canvas.width =
+    video.videoWidth;
+
+  canvas.height =
+    video.videoHeight;
+
+
+  const context =
+    canvas.getContext(
+      '2d'
+    );
+
+
+  context.drawImage(
+    video,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+
+  capturedData =
+    canvas.toDataURL(
+      'image/jpeg',
+      0.9
+    );
+
+
+  const image =
+    document.getElementById(
+      'capturedImage'
+    );
+
+  image.src =
+    capturedData;
+
+  image.style.display =
+    'block';
+
+
+  video.style.display =
+    'none';
+
+
+  document.getElementById(
+    'faceGuide'
+  ).style.display =
+    'none';
+
+
+  document.getElementById(
+    'takeButton'
+  ).style.display =
+    'none';
+
+
+  document.getElementById(
+    'retakeButton'
+  ).style.display =
+    'inline-block';
+
+
+  document.getElementById(
+    'useButton'
+  ).style.display =
+    'inline-block';
+
+}
+
+
+function retakePhoto(){
+
+  clearError();
+
+  capturedData =
+    null;
+
+
+  document.getElementById(
+    'capturedImage'
+  ).style.display =
+    'none';
+
+
+  document.getElementById(
+    'video'
+  ).style.display =
+    'block';
+
+
+  document.getElementById(
+    'faceGuide'
+  ).style.display =
+    'block';
+
+
+  document.getElementById(
+    'takeButton'
+  ).style.display =
+    'inline-block';
+
+
+  document.getElementById(
+    'retakeButton'
+  ).style.display =
+    'none';
+
+
+  document.getElementById(
+    'useButton'
+  ).style.display =
+    'none';
+
+}
+
+
+function usePhoto(){
+
+  clearError();
+
+  if(!capturedData){
+
+    showError(
+      'Please take a photo first.'
+    );
+
+    return;
+
+  }
+
+
+  if(window.opener){
+
+    window.opener.postMessage({
+
+      type:
+        'PARKING_SELFIE_CAPTURED',
+
+      image:
+        capturedData
+
+    }, '*');
+
+  }
+
+
+  stopCamera();
+
+  window.close();
+
+}
+
+
+function stopCamera(){
+
+  if(stream){
+
+    stream
+      .getTracks()
+      .forEach(
+        function(track){
+          track.stop();
+        }
+      );
+
+    stream =
+      null;
+
+  }
+
+}
+
+
+window.addEventListener(
+  'beforeunload',
+  stopCamera
+);
+
+
+startCamera();
+
+</script>
+
+</body>
+</html>
