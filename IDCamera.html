@@ -1379,8 +1379,7 @@ function detectDocument(){
 
   if(
     !video.videoWidth ||
-    !video.videoHeight ||
-    !workCanvas
+    !video.videoHeight
   ){
 
     return null;
@@ -1390,32 +1389,90 @@ function detectDocument(){
 
   /*
    * ========================================================
-   * SMALL WORKING IMAGE
-   *
-   * We preserve the camera's original aspect ratio.
-   * This keeps the real Student ID proportions.
+   * USE THE CENTER GUIDE AS THE DOCUMENT REGION
+   * ========================================================
+   */
+
+  const frameWidth =
+    video.videoWidth;
+
+  const frameHeight =
+    video.videoHeight;
+
+
+  /*
+   * These correspond to the visible
+   * portrait guide on the screen.
+   */
+
+  const guideWidth =
+    frameWidth * 0.68;
+
+  const guideHeight =
+    guideWidth * 4 / 3;
+
+
+  const guideLeft =
+    (frameWidth - guideWidth) / 2;
+
+
+  const guideTop =
+    (frameHeight - guideHeight) / 2;
+
+
+  const guideRight =
+    guideLeft + guideWidth;
+
+
+  const guideBottom =
+    guideTop + guideHeight;
+
+
+  /*
+   * Prevent invalid crop on unusual
+   * camera aspect ratios.
+   */
+
+  if(
+    guideTop < 0 ||
+    guideBottom > frameHeight
+  ){
+
+    return null;
+
+  }
+
+
+  /*
+   * ========================================================
+   * SMALL WORK IMAGE
    * ========================================================
    */
 
   const scanWidth =
-    320;
+    240;
+
+
+  const scale =
+    scanWidth /
+    frameWidth;
+
 
   const scanHeight =
     Math.round(
-      video.videoHeight *
-      scanWidth /
-      video.videoWidth
+      frameHeight * scale
     );
 
 
   workCanvas.width =
     scanWidth;
 
+
   workCanvas.height =
     scanHeight;
 
 
-  const context =
+  const ctx =
     workCanvas.getContext(
       '2d',
       {
@@ -1424,7 +1481,7 @@ function detectDocument(){
     );
 
 
-  context.drawImage(
+  ctx.drawImage(
 
     video,
 
@@ -1437,873 +1494,39 @@ function detectDocument(){
   );
 
 
-  const imageData =
-    context.getImageData(
-
-      0,
-      0,
-
-      scanWidth,
-      scanHeight
-
-    );
-
-
-  const pixels =
-    imageData.data;
-
-
   /*
    * ========================================================
-   * CONVERT TO GRAYSCALE
+   * GUIDE ROI
    * ========================================================
    */
 
-  const gray =
-    new Float32Array(
-      scanWidth *
-      scanHeight
+  const roiX =
+    Math.round(
+      guideLeft * scale
     );
 
 
-  let p =
-    0;
-
-
-  for(
-    let y = 0;
-    y < scanHeight;
-    y++
-  ){
-
-    for(
-      let x = 0;
-      x < scanWidth;
-      x++
-    ){
-
-      const r =
-        pixels[p];
-
-
-      const g =
-        pixels[p + 1];
-
-
-      const b =
-        pixels[p + 2];
-
-
-      gray[
-        y *
-        scanWidth +
-        x
-      ] =
-
-        (
-          0.299 * r +
-          0.587 * g +
-          0.114 * b
-        );
-
-
-      p += 4;
-
-    }
-
-  }
-
-
-  /*
-   * ========================================================
-   * EDGE PROFILES
-   *
-   * Vertical profile = likely left/right ID edges.
-   *
-   * Horizontal profile = likely top/bottom ID edges.
-   * ========================================================
-   */
-
-  const vertical =
-    new Float32Array(
-      scanWidth - 2
+  const roiY =
+    Math.round(
+      guideTop * scale
     );
 
 
-  const horizontal =
-    new Float32Array(
-      scanHeight - 2
+  const roiWidth =
+    Math.round(
+      guideWidth * scale
     );
 
 
-  const vTop =
-    Math.floor(
-      scanHeight *
-      0.08
+  const roiHeight =
+    Math.round(
+      guideHeight * scale
     );
 
-
-  const vBottom =
-    Math.floor(
-      scanHeight *
-      0.92
-    );
-
-
-  const hLeft =
-    Math.floor(
-      scanWidth *
-      0.12
-    );
-
-
-  const hRight =
-    Math.floor(
-      scanWidth *
-      0.88
-    );
-
-
-  /*
-   * Vertical edges.
-   */
-
-  for(
-    let x = 1;
-    x < scanWidth - 1;
-    x++
-  ){
-
-    let total =
-      0;
-
-
-    let count =
-      0;
-
-
-    for(
-      let y = vTop;
-      y < vBottom;
-      y++
-    ){
-
-      const left =
-        gray[
-          y *
-          scanWidth +
-          x - 1
-        ];
-
-
-      const right =
-        gray[
-          y *
-          scanWidth +
-          x + 1
-        ];
-
-
-      total +=
-        Math.abs(
-          right -
-          left
-        );
-
-
-      count++;
-
-    }
-
-
-    vertical[x - 1] =
-      total /
-      count;
-
-  }
-
-
-  /*
-   * Horizontal edges.
-   */
-
-  for(
-    let y = 1;
-    y < scanHeight - 1;
-    y++
-  ){
-
-    let total =
-      0;
-
-
-    let count =
-      0;
-
-
-    for(
-      let x = hLeft;
-      x < hRight;
-      x++
-    ){
-
-      const top =
-        gray[
-          (y - 1) *
-          scanWidth +
-          x
-        ];
-
-
-      const bottom =
-        gray[
-          (y + 1) *
-          scanWidth +
-          x
-        ];
-
-
-      total +=
-        Math.abs(
-          bottom -
-          top
-        );
-
-
-      count++;
-
-    }
-
-
-    horizontal[y - 1] =
-      total /
-      count;
-
-  }
-
-
-  /*
-   * ========================================================
-   * SMOOTH 1-D SIGNAL
-   * ========================================================
-   */
-
-  function smooth(
-    array,
-    radius
-  ){
-
-    const result =
-      new Float32Array(
-        array.length
-      );
-
-
-    for(
-      let i = 0;
-      i < array.length;
-      i++
-    ){
-
-      let total =
-        0;
-
-      let count =
-        0;
-
-
-      for(
-        let j =
-          Math.max(
-            0,
-            i - radius
-          );
-
-        j <=
-          Math.min(
-            array.length - 1,
-            i + radius
-          );
-
-        j++
-      ){
-
-        total +=
-          array[j];
-
-        count++;
-
-      }
-
-
-      result[i] =
-        total /
-        count;
-
-    }
-
-
-    return result;
-
-  }
-
-
-  const verticalSmooth =
-    smooth(
-      vertical,
-      4
-    );
-
-
-  const horizontalSmooth =
-    smooth(
-      horizontal,
-      4
-    );
-
-
-  /*
-   * ========================================================
-   * FIND STRONG EDGE PEAKS
-   * ========================================================
-   */
-
-  function getPeaks(
-    array,
-    start,
-    end,
-    maxPeaks,
-    minimumDistance
-  ){
-
-    const candidates =
-      [];
-
-
-    for(
-      let i = start;
-      i < end;
-      i++
-    ){
-
-      candidates.push({
-
-        index:
-          i,
-
-        value:
-          array[i]
-
-      });
-
-    }
-
-
-    candidates.sort(
-      function(a,b){
-
-        return (
-          b.value -
-          a.value
-        );
-
-      }
-    );
-
-
-    const selected =
-      [];
-
-
-    for(
-      const candidate
-      of candidates
-    ){
-
-      let farEnough =
-        true;
-
-
-      for(
-        const current
-        of selected
-      ){
-
-        if(
-          Math.abs(
-            candidate.index -
-            current.index
-          ) <
-          minimumDistance
-        ){
-
-          farEnough =
-            false;
-
-          break;
-
-        }
-
-      }
-
-
-      if(
-        farEnough
-      ){
-
-        selected.push(
-          candidate
-        );
-
-      }
-
-
-      if(
-        selected.length >=
-        maxPeaks
-      ){
-
-        break;
-
-      }
-
-    }
-
-
-    return selected;
-
-  }
-
-
-  /*
-   * Left and right ID edges.
-   */
-
-  const leftPeaks =
-    getPeaks(
-
-      verticalSmooth,
-
-      Math.floor(
-        scanWidth *
-        0.08
-      ),
-
-      Math.floor(
-        scanWidth *
-        0.48
-      ),
-
-      14,
-
-      8
-
-    );
-
-
-  const rightPeaks =
-    getPeaks(
-
-      verticalSmooth,
-
-      Math.floor(
-        scanWidth *
-        0.52
-      ),
-
-      Math.floor(
-        scanWidth *
-        0.92
-      ),
-
-      14,
-
-      8
-
-    );
-
-
-  /*
-   * ========================================================
-   * EXPECTED PHYSICAL ID RATIO
-   *
-   * Vertical card:
-   * 54 mm × 85.6 mm
-   *
-   * Width / Height ≈ 0.631
-   * ========================================================
-   */
-
-  const expectedRatio =
-    54 / 85.6;
-
-
-  let best =
-    null;
-
-
-  /*
-   * ========================================================
-   * TEST POSSIBLE LEFT/RIGHT PAIRS
-   * ========================================================
-   */
-
-  for(
-    const left
-    of leftPeaks
-  ){
-
-    for(
-      const right
-      of rightPeaks
-    ){
-
-      const leftX =
-        left.index + 1;
-
-
-      const rightX =
-        right.index + 1;
-
-
-      const width =
-        rightX -
-        leftX;
-
-
-      /*
-       * ID should take a meaningful
-       * portion of the screen.
-       */
-
-      if(
-        width <
-        scanWidth *
-        0.24
-      ){
-
-        continue;
-
-      }
-
-
-      /*
-       * Infer expected ID height
-       * from physical proportions.
-       */
-
-      const expectedHeight =
-        width /
-        expectedRatio;
-
-
-      if(
-        expectedHeight <
-        scanHeight *
-        0.45 ||
-
-        expectedHeight >
-        scanHeight *
-        0.96
-      ){
-
-        continue;
-
-      }
-
-
-      const centerX =
-        (
-          leftX +
-          rightX
-        ) / 2;
-
-
-      const normalizedCenterX =
-        centerX /
-        scanWidth;
-
-
-      /*
-       * The ID must be reasonably centered.
-       */
-
-      if(
-        normalizedCenterX <
-        0.25 ||
-
-        normalizedCenterX >
-        0.75
-      ){
-
-        continue;
-
-      }
-
-
-      /*
-       * ====================================================
-       * TEST POSSIBLE VERTICAL POSITIONS
-       * ====================================================
-       */
-
-      for(
-        let centerY =
-          scanHeight * 0.35;
-
-        centerY <=
-          scanHeight * 0.65;
-
-        centerY +=
-          scanHeight * 0.0125
-      ){
-
-        const topY =
-          centerY -
-          expectedHeight / 2;
-
-
-        const bottomY =
-          centerY +
-          expectedHeight / 2;
-
-
-        if(
-          topY < 2 ||
-          bottomY >
-            scanHeight - 2
-        ){
-
-          continue;
-
-        }
-
-
-        /*
-         * Find the strongest horizontal
-         * edge close to the estimated
-         * top and bottom.
-         */
-
-        function localMaximum(
-          array,
-          position,
-          radius
-        ){
-
-          const start =
-            Math.max(
-              0,
-              Math.floor(
-                position -
-                radius
-              )
-            );
-
-
-          const end =
-            Math.min(
-              array.length,
-              Math.ceil(
-                position +
-                radius
-              )
-            );
-
-
-          let max =
-            0;
-
-
-          for(
-            let i =
-              start;
-
-            i < end;
-
-            i++
-          ){
-
-            if(
-              array[i] >
-              max
-            ){
-
-              max =
-                array[i];
-
-            }
-
-          }
-
-
-          return max;
-
-        }
-
-
-        const topStrength =
-          localMaximum(
-            horizontalSmooth,
-            topY,
-            12
-          );
-
-
-        const bottomStrength =
-          localMaximum(
-            horizontalSmooth,
-            bottomY,
-            12
-          );
-
-
-        /*
-         * Vertical edge strength.
-         */
-
-        const leftStrength =
-          left.value;
-
-
-        const rightStrength =
-          right.value;
-
-
-        /*
-         * All four sides should have
-         * some meaningful edge signal.
-         */
-
-        if(
-          leftStrength <= 0 ||
-          rightStrength <= 0 ||
-          topStrength <= 0 ||
-          bottomStrength <= 0
-        ){
-
-          continue;
-
-        }
-
-
-        /*
-         * Center penalty.
-         */
-
-        const normalizedCenterY =
-          centerY /
-          scanHeight;
-
-
-        const centerPenalty =
-
-          Math.abs(
-            normalizedCenterX -
-            0.5
-          )
-
-          +
-
-          Math.abs(
-            normalizedCenterY -
-            0.5
-          );
-
-
-        /*
-         * Aspect penalty.
-         */
-
-        const actualRatio =
-          width /
-          expectedHeight;
-
-
-        const aspectDifference =
-          Math.abs(
-            actualRatio -
-            expectedRatio
-          );
-
-
-        /*
-         * Score the rectangle.
-         */
-
-        const score =
-
-          (
-            leftStrength +
-            rightStrength
-
-          )
-
-          +
-
-          (
-            topStrength +
-            bottomStrength
-          ) * 1.25
-
-          +
-
-          (
-            1 -
-            Math.min(
-              1,
-              aspectDifference /
-              expectedRatio
-            )
-          ) * 10
-
-          -
-
-          centerPenalty * 12;
-
-
-        if(
-          !best ||
-          score >
-            best.score
-        ){
-
-          best = {
-
-            score:
-              score,
-
-            left:
-              leftX,
-
-            right:
-              rightX,
-
-            top:
-              topY,
-
-            bottom:
-              bottomY
-
-          };
-
-        }
-
-      }
-
-    }
-
-  }
-
-
-  /*
-   * ========================================================
-   * REJECT WEAK DETECTIONS
-   * ========================================================
-   */
 
   if(
-    !best
+    roiWidth <= 0 ||
+    roiHeight <= 0
   ){
 
     return null;
@@ -2313,20 +1536,247 @@ function detectDocument(){
 
   /*
    * ========================================================
-   * CONVERT BACK TO ORIGINAL CAMERA
-   * COORDINATES
+   * READ THE GUIDE REGION
    * ========================================================
    */
 
-  const scaleX =
-    video.videoWidth /
-    scanWidth;
+  const imageData =
+    ctx.getImageData(
+
+      roiX,
+      roiY,
+
+      roiWidth,
+      roiHeight
+
+    );
 
 
-  const scaleY =
-    video.videoHeight /
-    scanHeight;
+  const pixels =
+    imageData.data;
 
+
+  let totalBrightness =
+    0;
+
+
+  let brightPixels =
+    0;
+
+
+  let darkPixels =
+    0;
+
+
+  const totalPixels =
+    pixels.length / 4;
+
+
+  for(
+    let i = 0;
+    i < pixels.length;
+    i += 4
+  ){
+
+    const r =
+      pixels[i];
+
+
+    const g =
+      pixels[i + 1];
+
+
+    const b =
+      pixels[i + 2];
+
+
+    const brightness =
+      (
+        0.299 * r +
+        0.587 * g +
+        0.114 * b
+      );
+
+
+    totalBrightness +=
+      brightness;
+
+
+    if(
+      brightness >= 125
+    ){
+
+      brightPixels++;
+
+    }
+
+
+    if(
+      brightness <= 45
+    ){
+
+      darkPixels++;
+
+    }
+
+  }
+
+
+  const averageBrightness =
+    totalBrightness /
+    totalPixels;
+
+
+  const brightRatio =
+    brightPixels /
+    totalPixels;
+
+
+  const darkRatio =
+    darkPixels /
+    totalPixels;
+
+
+  /*
+   * ========================================================
+   * CARD PRESENCE
+   *
+   * Your physical ID is predominantly
+   * light-colored. We don't require every
+   * pixel to be bright because text,
+   * photo, logo and shadows are expected.
+   * ========================================================
+   */
+
+  const cardLooksPresent =
+
+    averageBrightness >= 70 &&
+
+    brightRatio >= 0.30 &&
+
+    darkRatio <= 0.45;
+
+
+  if(
+    !cardLooksPresent
+  ){
+
+    return null;
+
+  }
+
+
+  /*
+   * ========================================================
+   * ADDITIONAL CENTER-REGION TEST
+   *
+   * A normal person's face by itself will
+   * not produce the same portrait card
+   * brightness distribution.
+   * ========================================================
+   */
+
+  const innerX =
+    Math.round(
+      roiWidth * 0.10
+    );
+
+
+  const innerY =
+    Math.round(
+      roiHeight * 0.06
+    );
+
+
+  const innerWidth =
+    Math.round(
+      roiWidth * 0.80
+    );
+
+
+  const innerHeight =
+    Math.round(
+      roiHeight * 0.88
+    );
+
+
+  const inner =
+    ctx.getImageData(
+
+      roiX + innerX,
+      roiY + innerY,
+
+      innerWidth,
+      innerHeight
+
+    );
+
+
+  let innerBrightness =
+    0;
+
+
+  const innerPixels =
+    inner.data.length / 4;
+
+
+  for(
+    let i = 0;
+    i < inner.data.length;
+    i += 4
+  ){
+
+    innerBrightness +=
+
+      (
+        0.299 *
+        inner.data[i]
+
+        +
+
+        0.587 *
+        inner.data[i + 1]
+
+        +
+
+        0.114 *
+        inner.data[i + 2]
+      );
+
+  }
+
+
+  innerBrightness /=
+    innerPixels;
+
+
+  /*
+   * The card should still be reasonably
+   * visible in its inner region.
+   */
+
+  if(
+    innerBrightness < 55
+  ){
+
+    return null;
+
+  }
+
+
+  /*
+   * ========================================================
+   * RETURN THE GUIDE AS THE DOCUMENT
+   *
+   * This is intentional:
+   *
+   * We are telling the scanner that the
+   * physical ID has successfully occupied
+   * the portrait document zone.
+   *
+   * Perspective correction happens later.
+   * ========================================================
+   */
 
   return {
 
@@ -2334,45 +1784,37 @@ function detectDocument(){
 
       {
         x:
-          best.left *
-          scaleX,
+          guideLeft,
 
         y:
-          best.top *
-          scaleY
+          guideTop
 
       },
 
       {
         x:
-          best.right *
-          scaleX,
+          guideRight,
 
         y:
-          best.top *
-          scaleY
+          guideTop
 
       },
 
       {
         x:
-          best.right *
-          scaleX,
+          guideRight,
 
         y:
-          best.bottom *
-          scaleY
+          guideBottom
 
       },
 
       {
         x:
-          best.left *
-          scaleX,
+          guideLeft,
 
         y:
-          best.bottom *
-          scaleY
+          guideBottom
 
       }
 
@@ -2382,30 +1824,22 @@ function detectDocument(){
     areaRatio:
 
       (
-        (
-          best.right -
-          best.left
-        )
-
-        *
-
-        (
-          best.bottom -
-          best.top
-        )
+        guideWidth *
+        guideHeight
       )
 
       /
 
       (
-        scanWidth *
-        scanHeight
+        frameWidth *
+        frameHeight
       ),
 
 
     ratio:
 
-      expectedRatio
+      guideWidth /
+      guideHeight
 
   };
 
