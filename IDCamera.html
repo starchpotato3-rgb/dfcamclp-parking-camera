@@ -1,317 +1,600 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1"
-  >
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
 
-  <title>Student ID Scanner</title>
+<title>Student ID Camera</title>
 
-  <style>
+<style>
 
-    *{
-      box-sizing:border-box;
-    }
+*{
+  box-sizing:border-box;
+}
 
-    body{
-      margin:0;
-      min-height:100vh;
-      padding:18px;
-      background:#f4f7fb;
-      font-family:Arial,sans-serif;
-      color:#172033;
+body{
+  margin:0;
+  min-height:100vh;
+  padding:18px;
 
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
+  background:#f4f7fb;
 
-    .card{
-      width:100%;
-      max-width:620px;
-      background:#fff;
-      border-radius:20px;
-      padding:20px;
-      box-shadow:0 10px 35px rgba(0,0,0,.12);
-      text-align:center;
-    }
+  font-family:Arial,sans-serif;
 
-    h1{
-      margin:0 0 8px;
-    }
+  color:#172033;
 
-    .muted{
-      color:#667085;
-      font-size:14px;
-      line-height:1.4;
-    }
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-    .camera-wrap{
-      position:relative;
-      width:100%;
-      max-width:420px;
-      aspect-ratio:3 / 4;
-      margin:20px auto;
-      overflow:hidden;
-      border-radius:18px;
-      background:#111827;
-    }
+.card{
 
-    #video,
-    #capturedImage{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
+  width:100%;
 
-    #video{
-      display:block;
-    }
+  max-width:620px;
 
-    #capturedImage{
-      display:none;
-      object-fit:contain;
-      background:#111827;
-    }
+  background:#fff;
 
-    #guide{
-      position:absolute;
-      left:50%;
-      top:50%;
-      width:70%;
-      aspect-ratio:3 / 4;
-      transform:translate(-50%,-50%);
-      border:3px solid rgba(255,255,255,.95);
-      border-radius:14px;
-      pointer-events:none;
-      box-shadow:0 0 0 9999px rgba(0,0,0,.30);
-    }
+  border-radius:20px;
 
-    #guide.detected{
-      border-color:#22c55e;
-    }
+  padding:20px;
 
-    .corner{
-      position:absolute;
-      width:26px;
-      height:26px;
-      border:4px solid white;
-    }
+  box-shadow:
+    0 10px 35px
+    rgba(0,0,0,.12);
 
-    .tl{
-      top:-3px;
-      left:-3px;
-      border-right:0;
-      border-bottom:0;
-      border-radius:8px 0 0 0;
-    }
+  text-align:center;
 
-    .tr{
-      top:-3px;
-      right:-3px;
-      border-left:0;
-      border-bottom:0;
-      border-radius:0 8px 0 0;
-    }
+}
 
-    .bl{
-      bottom:-3px;
-      left:-3px;
-      border-right:0;
-      border-top:0;
-      border-radius:0 0 0 8px;
-    }
+h1{
 
-    .br{
-      bottom:-3px;
-      right:-3px;
-      border-left:0;
-      border-top:0;
-      border-radius:0 0 8px 0;
-    }
+  margin:
+    0 0 8px;
 
-    #instruction{
-      margin-top:10px;
-      font-weight:800;
-      font-size:15px;
-    }
+}
 
-    #status{
-      margin-top:7px;
-      min-height:20px;
-      font-size:13px;
-      color:#667085;
-    }
+.muted{
 
-    .error{
-      display:none;
-      margin-top:14px;
-      padding:12px;
-      border-radius:10px;
-      background:#fee2e2;
-      color:#991b1b;
-      font-size:14px;
-    }
+  color:#667085;
 
-    .actions{
-      display:flex;
-      justify-content:center;
-      gap:10px;
-      margin-top:16px;
-      flex-wrap:wrap;
-    }
+  font-size:14px;
 
-    button{
-      border:0;
-      border-radius:10px;
-      padding:12px 18px;
-      font-size:15px;
-      font-weight:800;
-      cursor:pointer;
-    }
+  line-height:1.5;
 
-    .secondary{
-      background:#e5e7eb;
-      color:#172033;
-    }
+}
 
-    .success{
-      background:#15803d;
-      color:#fff;
-    }
 
-  </style>
+/* ==========================================================
+   CAMERA
+   ========================================================== */
+
+.camera-wrap{
+
+  position:relative;
+
+  width:100%;
+
+  max-width:420px;
+
+  aspect-ratio:3 / 4;
+
+  margin:20px auto;
+
+  overflow:hidden;
+
+  border-radius:18px;
+
+  background:#111827;
+
+}
+
+#video{
+
+  position:absolute;
+
+  inset:0;
+
+  width:100%;
+
+  height:100%;
+
+  object-fit:cover;
+
+  display:block;
+
+}
+
+#capturedImage{
+
+  position:absolute;
+
+  inset:0;
+
+  width:100%;
+
+  height:100%;
+
+  object-fit:contain;
+
+  background:#111827;
+
+  display:none;
+
+}
+
+
+/* ==========================================================
+   CENTER GUIDE
+   ========================================================== */
+
+#guide{
+
+  position:absolute;
+
+  left:50%;
+
+  top:50%;
+
+  width:70%;
+
+  aspect-ratio:3 / 4;
+
+  transform:
+    translate(-50%,-50%);
+
+  border:
+    3px solid rgba(
+      255,
+      255,
+      255,
+      .95
+    );
+
+  border-radius:14px;
+
+  pointer-events:none;
+
+  box-shadow:
+    0 0 0 9999px
+    rgba(0,0,0,.30);
+
+}
+
+
+/* GUIDE CORNERS */
+
+.corner{
+
+  position:absolute;
+
+  width:26px;
+
+  height:26px;
+
+  border:
+    4px solid white;
+
+}
+
+.corner.tl{
+
+  top:-3px;
+
+  left:-3px;
+
+  border-right:0;
+
+  border-bottom:0;
+
+  border-radius:
+    8px 0 0 0;
+
+}
+
+.corner.tr{
+
+  top:-3px;
+
+  right:-3px;
+
+  border-left:0;
+
+  border-bottom:0;
+
+  border-radius:
+    0 8px 0 0;
+
+}
+
+.corner.bl{
+
+  bottom:-3px;
+
+  left:-3px;
+
+  border-right:0;
+
+  border-top:0;
+
+  border-radius:
+    0 0 0 8px;
+
+}
+
+.corner.br{
+
+  bottom:-3px;
+
+  right:-3px;
+
+  border-left:0;
+
+  border-top:0;
+
+  border-radius:
+    0 0 8px 0;
+
+}
+
+
+/* ==========================================================
+   TEXT
+   ========================================================== */
+
+#instruction{
+
+  margin-top:10px;
+
+  font-size:15px;
+
+  font-weight:800;
+
+}
+
+#status{
+
+  margin-top:7px;
+
+  min-height:20px;
+
+  font-size:13px;
+
+  color:#667085;
+
+}
+
+
+/* ==========================================================
+   BUTTONS
+   ========================================================== */
+
+.actions{
+
+  display:flex;
+
+  justify-content:center;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+
+  margin-top:16px;
+
+}
+
+button{
+
+  border:0;
+
+  border-radius:10px;
+
+  padding:13px 20px;
+
+  font-size:15px;
+
+  font-weight:800;
+
+  cursor:pointer;
+
+}
+
+button:disabled{
+
+  opacity:.45;
+
+  cursor:not-allowed;
+
+}
+
+.primary{
+
+  background:#1d4ed8;
+
+  color:#fff;
+
+}
+
+.secondary{
+
+  background:#e5e7eb;
+
+  color:#172033;
+
+}
+
+.success{
+
+  background:#15803d;
+
+  color:#fff;
+
+}
+
+
+/* ==========================================================
+   ERROR
+   ========================================================== */
+
+#error{
+
+  display:none;
+
+  margin-top:14px;
+
+  padding:12px;
+
+  border-radius:10px;
+
+  background:#fee2e2;
+
+  color:#991b1b;
+
+  font-size:14px;
+
+}
+
+
+/* ==========================================================
+   RESULT
+   ========================================================== */
+
+#reviewText{
+
+  display:none;
+
+  margin-top:12px;
+
+  padding:10px;
+
+  border-radius:10px;
+
+  background:#dcfce7;
+
+  color:#166534;
+
+  font-size:13px;
+
+  font-weight:700;
+
+}
+
+</style>
 
 </head>
 
+
 <body>
+
 
 <div class="card">
 
-  <h1>Student ID Scanner</h1>
 
-  <p class="muted">
-    Hold your physical Student ID vertically in the center.
-    The system will automatically detect and scan the card.
-  </p>
+<h1>
+  Student ID Camera
+</h1>
 
-  <div class="camera-wrap">
 
-    <video
-      id="video"
-      autoplay
-      playsinline
-      muted
-    ></video>
+<p class="muted">
 
-    <img
-      id="capturedImage"
-      alt="Scanned Student ID"
-    >
+  Place your physical Student ID or school card
+  inside the guide and take a clear photo.
 
-    <div id="guide">
+</p>
 
-      <span class="corner tl"></span>
-      <span class="corner tr"></span>
-      <span class="corner bl"></span>
-      <span class="corner br"></span>
 
-    </div>
+<div class="camera-wrap">
 
-  </div>
 
-  <div id="instruction">
-    Starting camera...
-  </div>
+  <video
+    id="video"
+    autoplay
+    playsinline
+    muted
+  ></video>
 
-  <div id="status">
-    Please allow camera access.
-  </div>
 
-  <div class="actions">
+  <img
+    id="capturedImage"
+    alt="Captured Student ID"
+  >
 
-    <button
-      id="retakeButton"
-      class="secondary"
-      style="display:none"
-      onclick="retakeScan()"
-    >
-      Retake
-    </button>
-
-    <button
-      id="useButton"
-      class="success"
-      style="display:none"
-      onclick="useScan()"
-    >
-      Use This ID
-    </button>
-
-  </div>
 
   <div
-    id="error"
-    class="error"
-  ></div>
+    id="guide"
+  >
+
+    <span class="corner tl"></span>
+
+    <span class="corner tr"></span>
+
+    <span class="corner bl"></span>
+
+    <span class="corner br"></span>
+
+  </div>
+
+</div>
+
+
+<div
+  id="instruction"
+>
+  Starting camera...
+</div>
+
+
+<div
+  id="status"
+>
+  Allow camera access when your browser asks.
+</div>
+
+
+<div
+  id="reviewText"
+>
+  Photo captured. Review it before continuing.
+</div>
+
+
+<div class="actions">
+
+
+  <button
+    id="takeButton"
+    class="primary"
+    onclick="takePhoto()"
+  >
+    Take Photo
+  </button>
+
+
+  <button
+    id="retakeButton"
+    class="secondary"
+    style="display:none;"
+    onclick="retakePhoto()"
+  >
+    Retake
+  </button>
+
+
+  <button
+    id="useButton"
+    class="success"
+    style="display:none;"
+    onclick="usePhoto()"
+  >
+    Use This ID
+  </button>
+
+</div>
+
+
+<div
+  id="error"
+></div>
+
 
 </div>
 
 
 <script>
 
-let stream = null;
 
-let opencvReady = false;
+/* ==========================================================
+   VARIABLES
+   ========================================================== */
 
-let scanTimer = null;
+let stream =
+  null;
 
-let scanning = false;
+let capturedData =
+  null;
 
-let stableFrames = 0;
 
-let lastCard = null;
-
-let capturedData = null;
-
-let autoCaptured = false;
-
+/* ==========================================================
+   ELEMENTS
+   ========================================================== */
 
 const video =
-  document.getElementById('video');
+  document.getElementById(
+    'video'
+  );
 
-const guide =
-  document.getElementById('guide');
 
 const capturedImage =
-  document.getElementById('capturedImage');
+  document.getElementById(
+    'capturedImage'
+  );
+
+
+const guide =
+  document.getElementById(
+    'guide'
+  );
+
 
 const instruction =
-  document.getElementById('instruction');
+  document.getElementById(
+    'instruction'
+  );
+
 
 const status =
-  document.getElementById('status');
+  document.getElementById(
+    'status'
+  );
 
-const errorBox =
-  document.getElementById('error');
+
+const takeButton =
+  document.getElementById(
+    'takeButton'
+  );
+
 
 const retakeButton =
-  document.getElementById('retakeButton');
+  document.getElementById(
+    'retakeButton'
+  );
+
 
 const useButton =
-  document.getElementById('useButton');
+  document.getElementById(
+    'useButton'
+  );
 
 
-function showError(text){
+const reviewText =
+  document.getElementById(
+    'reviewText'
+  );
+
+
+const errorBox =
+  document.getElementById(
+    'error'
+  );
+
+
+/* ==========================================================
+   ERROR
+   ========================================================== */
+
+function showError(
+  message
+){
 
   errorBox.textContent =
-    text;
+    message;
 
   errorBox.style.display =
     'block';
@@ -338,51 +621,46 @@ async function startCamera(){
 
   clearError();
 
+
   instruction.textContent =
     'Requesting camera access...';
 
+
   try{
 
-    if(
-      !navigator.mediaDevices ||
-      !navigator.mediaDevices.getUserMedia
-    ){
-
-      throw new Error(
-        'Camera API is not available.'
-      );
-
-    }
-
-
     /*
-     * First try the rear camera.
-     * This is best for a phone scanning
-     * a physical ID.
+     * Prefer rear camera on phone.
      */
 
     try{
 
       stream =
-        await navigator.mediaDevices.getUserMedia({
+        await navigator
+          .mediaDevices
+          .getUserMedia({
 
-          video:{
-            facingMode:{
-              ideal:'environment'
+            video:{
+
+              facingMode:{
+                ideal:
+                  'environment'
+              },
+
+              width:{
+                ideal:
+                  1280
+              },
+
+              height:{
+                ideal:
+                  720
+              }
+
             },
 
-            width:{
-              ideal:1280
-            },
+            audio:false
 
-            height:{
-              ideal:720
-            }
-          },
-
-          audio:false
-
-        });
+          });
 
     }
     catch(firstError){
@@ -392,21 +670,27 @@ async function startCamera(){
        */
 
       stream =
-        await navigator.mediaDevices.getUserMedia({
+        await navigator
+          .mediaDevices
+          .getUserMedia({
 
-          video:{
-            width:{
-              ideal:640
+            video:{
+
+              width:{
+                ideal:
+                  640
+              },
+
+              height:{
+                ideal:
+                  480
+              }
+
             },
 
-            height:{
-              ideal:480
-            }
-          },
+            audio:false
 
-          audio:false
-
-        });
+          });
 
     }
 
@@ -414,32 +698,32 @@ async function startCamera(){
     video.srcObject =
       stream;
 
+
     await video.play();
 
 
     instruction.textContent =
-      'Camera ready. Position your Student ID in the center.';
+      'Position your Student ID inside the guide.';
+
 
     status.textContent =
-      'Loading document scanner...';
-
-
-    loadOpenCV();
-
+      'Make sure the entire card is visible before taking the photo.';
 
   }
   catch(error){
 
     console.error(
-      'CAMERA ERROR:',
+      'Camera error:',
       error
     );
+
 
     instruction.textContent =
       'Camera could not start.';
 
+
     showError(
-      'Camera access failed. Please allow camera permission for this site and refresh the page.'
+      'Camera access failed. Please allow camera permission and refresh this page.'
     );
 
   }
@@ -448,1363 +732,201 @@ async function startCamera(){
 
 
 /* ==========================================================
-   LOAD OPENCV AFTER CAMERA
+   TAKE PHOTO
    ========================================================== */
 
-function loadOpenCV(){
+function takePhoto(){
+
+  clearError();
+
 
   if(
-    window.cv &&
-    window.cv.Mat
+    !video.videoWidth ||
+    !video.videoHeight
   ){
 
-    opencvReady =
-      true;
-
-    status.textContent =
-      'Document scanner ready.';
-
-    beginScanning();
+    showError(
+      'The camera is not ready yet.'
+    );
 
     return;
 
   }
 
 
-  const script =
-    document.createElement('script');
-
-
-  script.src =
-    'https://docs.opencv.org/4.x/opencv.js';
-
-  script.async =
-    true;
-
-
-  script.onload =
-    function(){
-
-      waitForOpenCV();
-
-    };
-
-
-  script.onerror =
-    function(){
-
-      status.textContent =
-        'Document scanner failed to load.';
-
-      showError(
-        'The document scanner library could not be loaded.'
-      );
-
-    };
-
-
-  document.head.appendChild(
-    script
-  );
-
-}
-
-
-function waitForOpenCV(){
-
-  const started =
-    Date.now();
-
-
-  const timer =
-    setInterval(
-      function(){
-
-        if(
-          window.cv &&
-          window.cv.Mat &&
-          window.cv.matFromImageData
-        ){
-
-          clearInterval(
-            timer
-          );
-
-          opencvReady =
-            true;
-
-          status.textContent =
-            'Document scanner ready.';
-
-          beginScanning();
-
-          return;
-
-        }
-
-
-        if(
-          Date.now() -
-          started >
-          20000
-        ){
-
-          clearInterval(
-            timer
-          );
-
-          showError(
-            'The document scanner took too long to load.'
-          );
-
-        }
-
-      },
-      100
-    );
-
-}
-
-
-/* ==========================================================
-   HELPERS
-   ========================================================== */
-
-function distance(a,b){
-
-  return Math.hypot(
-    b.x-a.x,
-    b.y-a.y
-  );
-
-}
-
-
-function orderCorners(points){
-
-  if(
-    !points ||
-    points.length !== 4
-  ){
-
-    return null;
-
-  }
-
-
-  const sums =
-    points.map(
-      p =>
-        p.x+p.y
-    );
-
-
-  const diffs =
-    points.map(
-      p =>
-        p.x-p.y
-    );
-
-
-  const tl =
-    sums.indexOf(
-      Math.min(...sums)
-    );
-
-
-  const br =
-    sums.indexOf(
-      Math.max(...sums)
-    );
-
-
-  const tr =
-    diffs.indexOf(
-      Math.max(...diffs)
-    );
-
-
-  const bl =
-    diffs.indexOf(
-      Math.min(...diffs)
-    );
-
-
-  return [
-
-    points[tl],
-    points[tr],
-    points[br],
-    points[bl]
-
-  ];
-
-}
-
-
-/* ==========================================================
-   DOCUMENT DETECTION
-   ========================================================== */
-
-function detectDocument(){
-
-  if(
-    !opencvReady ||
-    !window.cv ||
-    !video.videoWidth ||
-    !video.videoHeight
-  ){
-
-    return null;
-
-  }
-
-
-  const cv =
-    window.cv;
-
-
   /*
-   * Work on a smaller image for speed.
+   * ========================================================
+   * CAPTURE THE AREA INSIDE THE GUIDE
+   *
+   * This produces a vertical image.
+   * ========================================================
    */
 
-  const scanWidth =
-    480;
-
-
-  const scale =
-    scanWidth /
+  const videoWidth =
     video.videoWidth;
 
 
-  const scanHeight =
-    Math.round(
-      video.videoHeight *
-      scale
-    );
-
-
-  const work =
-    document.createElement(
-      'canvas'
-    );
-
-
-  work.width =
-    scanWidth;
-
-  work.height =
-    scanHeight;
-
-
-  const ctx =
-    work.getContext(
-      '2d',
-      {
-        willReadFrequently:true
-      }
-    );
-
-
-  ctx.drawImage(
-    video,
-    0,
-    0,
-    scanWidth,
-    scanHeight
-  );
-
-
-  const imageData =
-    ctx.getImageData(
-      0,
-      0,
-      scanWidth,
-      scanHeight
-    );
-
-
-  const src =
-    cv.matFromImageData(
-      imageData
-    );
-
-
-  const gray =
-    new cv.Mat();
-
-
-  const blur =
-    new cv.Mat();
-
-
-  const edges =
-    new cv.Mat();
-
-
-  const contours =
-    new cv.MatVector();
-
-
-  const hierarchy =
-    new cv.Mat();
-
-
-  let best =
-    null;
-
-
-  try{
-
-    cv.cvtColor(
-      src,
-      gray,
-      cv.COLOR_RGBA2GRAY
-    );
-
-
-    cv.GaussianBlur(
-      gray,
-      blur,
-      new cv.Size(5,5),
-      0
-    );
-
-
-    cv.Canny(
-      blur,
-      edges,
-      40,
-      120
-    );
-
-
-    /*
-     * Close small gaps in ID edges.
-     */
-
-    const kernel =
-      cv.Mat.ones(
-        3,
-        3,
-        cv.CV_8U
-      );
-
-
-    cv.dilate(
-      edges,
-      edges,
-      kernel
-    );
-
-
-    cv.erode(
-      edges,
-      edges,
-      kernel
-    );
-
-
-    kernel.delete();
-
-
-    cv.findContours(
-      edges,
-      contours,
-      hierarchy,
-      cv.RETR_EXTERNAL,
-      cv.CHAIN_APPROX_SIMPLE
-    );
-
-
-    const frameArea =
-      scanWidth *
-      scanHeight;
-
-
-    for(
-      let i = 0;
-      i < contours.size();
-      i++
-    ){
-
-      const contour =
-        contours.get(i);
-
-
-      try{
-
-        const area =
-          Math.abs(
-            cv.contourArea(
-              contour
-            )
-          );
-
-
-        /*
-         * Ignore tiny objects.
-         */
-
-        if(
-          area <
-          frameArea * 0.05
-        ){
-
-          continue;
-
-        }
-
-
-        const perimeter =
-          cv.arcLength(
-            contour,
-            true
-          );
-
-
-        if(
-          perimeter <= 0
-        ){
-
-          continue;
-
-        }
-
-
-        const approx =
-          new cv.Mat();
-
-
-        try{
-
-          cv.approxPolyDP(
-            contour,
-            approx,
-            perimeter * 0.035,
-            true
-          );
-
-
-          let points = null;
-
-
-          /*
-           * First choice:
-           * four-corner contour.
-           */
-
-          if(
-            approx.rows === 4
-          ){
-
-            points = [];
-
-
-            for(
-              let j = 0;
-              j < 4;
-              j++
-            ){
-
-              points.push({
-
-                x:
-                  approx.intAt(
-                    j,
-                    0
-                  ),
-
-                y:
-                  approx.intAt(
-                    j,
-                    1
-                  )
-
-              });
-
-            }
-
-          }
-          else{
-
-            /*
-             * Fallback:
-             * minimum-area rectangle.
-             */
-
-            const rect =
-              cv.minAreaRect(
-                contour
-              );
-
-
-            const box =
-              cv.boxPoints(
-                rect
-              );
-
-
-            points =
-              [];
-
-
-            for(
-              let j = 0;
-              j < box.length;
-              j++
-            ){
-
-              points.push({
-
-                x:
-                  box[j].x,
-
-                y:
-                  box[j].y
-
-              });
-
-            }
-
-          }
-
-
-          const ordered =
-            orderCorners(
-              points
-            );
-
-
-          if(
-            !ordered
-          ){
-
-            continue;
-
-          }
-
-
-          /*
-           * Width and height in SCAN coordinates.
-           */
-
-          const width =
-            (
-              distance(
-                ordered[0],
-                ordered[1]
-              )
-              +
-              distance(
-                ordered[3],
-                ordered[2]
-              )
-            ) / 2;
-
-
-          const height =
-            (
-              distance(
-                ordered[0],
-                ordered[3]
-              )
-              +
-              distance(
-                ordered[1],
-                ordered[2]
-              )
-            ) / 2;
-
-
-          if(
-            width <= 0 ||
-            height <= 0
-          ){
-
-            continue;
-
-          }
-
-
-          const ratio =
-            width /
-            height;
-
-
-          /*
-           * Portrait Student ID.
-           */
-
-          if(
-            ratio < 0.35 ||
-            ratio > 0.95
-          ){
-
-            continue;
-
-          }
-
-
-          /*
-           * IMPORTANT:
-           * These are SCAN coordinates.
-           * Compare center to scanWidth/scanHeight,
-           * NOT the full camera dimensions.
-           */
-
-          const centerX =
-            (
-              ordered[0].x +
-              ordered[1].x +
-              ordered[2].x +
-              ordered[3].x
-            ) / 4;
-
-
-          const centerY =
-            (
-              ordered[0].y +
-              ordered[1].y +
-              ordered[2].y +
-              ordered[3].y
-            ) / 4;
-
-
-          const normalizedX =
-            centerX /
-            scanWidth;
-
-
-          const normalizedY =
-            centerY /
-            scanHeight;
-
-
-          /*
-           * Reasonably centered.
-           */
-
-          if(
-            normalizedX < 0.15 ||
-            normalizedX > 0.85 ||
-            normalizedY < 0.10 ||
-            normalizedY > 0.90
-          ){
-
-            continue;
-
-          }
-
-
-          const areaRatio =
-            area /
-            frameArea;
-
-
-          /*
-           * Ignore tiny documents.
-           */
-
-          if(
-            areaRatio < 0.06
-          ){
-
-            continue;
-
-          }
-
-
-          /*
-           * Target Student ID ratio.
-           */
-
-          const targetRatio =
-            54 / 85.6;
-
-
-          const ratioError =
-            Math.abs(
-              ratio -
-              targetRatio
-            );
-
-
-          const centerError =
-            Math.hypot(
-              normalizedX -
-              0.5,
-
-              normalizedY -
-              0.5
-            );
-
-
-          /*
-           * Larger + more portrait +
-           * more centered = stronger match.
-           */
-
-          const score =
-
-            areaRatio * 100
-
-            +
-
-            Math.max(
-              0,
-              20 -
-              ratioError * 30
-            )
-
-            +
-
-            Math.max(
-              0,
-              15 -
-              centerError * 25
-            );
-
-
-          if(
-            !best ||
-            score >
-            best.score
-          ){
-
-            const sx =
-              video.videoWidth /
-              scanWidth;
-
-
-            const sy =
-              video.videoHeight /
-              scanHeight;
-
-
-            /*
-             * Convert the four detected
-             * corners back to full camera
-             * coordinates.
-             */
-
-            best = {
-
-              score:
-                score,
-
-              areaRatio:
-                areaRatio,
-
-              ratio:
-                ratio,
-
-              points:
-                ordered.map(
-                  function(
-                    point
-                  ){
-
-                    return {
-
-                      x:
-                        point.x *
-                        sx,
-
-                      y:
-                        point.y *
-                        sy
-
-                    };
-
-                  }
-                )
-
-            };
-
-          }
-
-        }
-        finally{
-
-          approx.delete();
-
-        }
-
-      }
-      finally{
-
-        contour.delete();
-
-      }
-
-    }
-
-  }
-  finally{
-
-    src.delete();
-
-    gray.delete();
-
-    blur.delete();
-
-    edges.delete();
-
-    contours.delete();
-
-    hierarchy.delete();
-
-  }
-
-
-  return best;
-
-}
-
-/* ==========================================================
-   STABILITY
-   ========================================================== */
-
-function checkStable(
-  current
-){
-
-  if(
-    !current
-  ){
-
-    lastCard =
-      null;
-
-    stableFrames =
-      0;
-
-    return false;
-
-  }
-
-
-  if(
-    !lastCard
-  ){
-
-    lastCard =
-      current;
-
-    stableFrames =
-      0;
-
-    return false;
-
-  }
-
-
-  function center(
-    card
-  ){
-
-    return {
-
-      x:
-        (
-          card.points[0].x+
-          card.points[1].x+
-          card.points[2].x+
-          card.points[3].x
-        )/4,
-
-      y:
-        (
-          card.points[0].y+
-          card.points[1].y+
-          card.points[2].y+
-          card.points[3].y
-        )/4
-
-    };
-
-  }
-
-
-  const a =
-    center(current);
-
-  const b =
-    center(lastCard);
-
-
-  const movement =
-    Math.hypot(
-      a.x-b.x,
-      a.y-b.y
-    );
-
-
-  if(
-    movement<18
-  ){
-
-    stableFrames++;
-
-  }
-  else{
-
-    stableFrames =
-      0;
-
-  }
-
-
-  lastCard =
-    current;
-
-
-  return (
-    stableFrames>=3
-  );
-
-}
-
-
-/* ==========================================================
-   PERSPECTIVE CORRECTION
-   ========================================================== */
-
-function correctDocument(
-  card
-){
-
-  const cv =
-    window.cv;
-
-
-  const tl =
-    card.points[0];
-
-  const tr =
-    card.points[1];
-
-  const br =
-    card.points[2];
-
-  const bl =
-    card.points[3];
-
-
-  const outputWidth =
-    Math.round(
-      Math.max(
-        distance(tl,tr),
-        distance(bl,br)
-      )
-    );
-
-
-  const outputHeight =
-    Math.round(
-      Math.max(
-        distance(tl,bl),
-        distance(tr,br)
-      )
-    );
-
-
-  const sourceCanvas =
-    document.createElement(
-      'canvas'
-    );
-
-
-  sourceCanvas.width =
-    video.videoWidth;
-
-  sourceCanvas.height =
+  const videoHeight =
     video.videoHeight;
 
 
-  const sourceContext =
-    sourceCanvas.getContext(
+  /*
+   * The guide is 70% wide
+   * and 3:4 portrait.
+   */
+
+  const cropWidth =
+    Math.round(
+      videoWidth * 0.70
+    );
+
+
+  const cropHeight =
+    Math.round(
+      cropWidth * 4 / 3
+    );
+
+
+  /*
+   * Make sure the crop fits the
+   * actual camera frame.
+   */
+
+  const finalWidth =
+    Math.min(
+      cropWidth,
+      videoWidth
+    );
+
+
+  const finalHeight =
+    Math.min(
+      cropHeight,
+      videoHeight
+    );
+
+
+  const cropX =
+    Math.round(
+      (
+        videoWidth -
+        finalWidth
+      ) / 2
+    );
+
+
+  const cropY =
+    Math.round(
+      (
+        videoHeight -
+        finalHeight
+      ) / 2
+    );
+
+
+  /*
+   * Create canvas.
+   */
+
+  const canvas =
+    document.createElement(
+      'canvas'
+    );
+
+
+  canvas.width =
+    finalWidth;
+
+
+  canvas.height =
+    finalHeight;
+
+
+  const context =
+    canvas.getContext(
       '2d'
     );
 
 
-  sourceContext.drawImage(
+  /*
+   * Capture the centered guide area.
+   */
+
+  context.drawImage(
+
     video,
+
+    cropX,
+    cropY,
+
+    finalWidth,
+    finalHeight,
+
     0,
     0,
-    sourceCanvas.width,
-    sourceCanvas.height
+
+    finalWidth,
+    finalHeight
+
   );
 
 
-  const frame =
-    sourceContext.getImageData(
-      0,
-      0,
-      sourceCanvas.width,
-      sourceCanvas.height
-    );
+  /*
+   * Convert to JPEG.
+   */
 
-
-  const src =
-    cv.matFromImageData(
-      frame
-    );
-
-
-  const dst =
-    new cv.Mat();
-
-
-  const srcPoints =
-    cv.matFromArray(
-      4,
-      1,
-      cv.CV_32FC2,
-      [
-
-        tl.x,
-        tl.y,
-
-        tr.x,
-        tr.y,
-
-        br.x,
-        br.y,
-
-        bl.x,
-        bl.y
-
-      ]
-    );
-
-
-  const dstPoints =
-    cv.matFromArray(
-      4,
-      1,
-      cv.CV_32FC2,
-      [
-
-        0,
-        0,
-
-        outputWidth,
-        0,
-
-        outputWidth,
-        outputHeight,
-
-        0,
-        outputHeight
-
-      ]
-    );
-
-
-  const transform =
-    cv.getPerspectiveTransform(
-      srcPoints,
-      dstPoints
-    );
-
-
-  cv.warpPerspective(
-    src,
-    dst,
-    transform,
-    new cv.Size(
-      outputWidth,
-      outputHeight
-    )
-  );
-
-
-  const outputCanvas =
-    document.createElement(
-      'canvas'
-    );
-
-
-  outputCanvas.width =
-    outputWidth;
-
-  outputCanvas.height =
-    outputHeight;
-
-
-  cv.imshow(
-    outputCanvas,
-    dst
-  );
-
-
-  const result =
-    outputCanvas.toDataURL(
+  capturedData =
+    canvas.toDataURL(
       'image/jpeg',
       0.95
     );
 
 
-  src.delete();
-  dst.delete();
-  srcPoints.delete();
-  dstPoints.delete();
-  transform.delete();
+  /*
+   * Show review.
+   */
 
+  capturedImage.src =
+    capturedData;
 
-  return result;
 
-}
+  capturedImage.style.display =
+    'block';
 
 
-/* ==========================================================
-   AUTO CAPTURE
-   ========================================================== */
+  video.style.display =
+    'none';
 
-function autoCapture(
-  card
-){
 
-  if(
-    autoCaptured
-  ){
+  guide.style.display =
+    'none';
 
-    return;
 
-  }
+  takeButton.style.display =
+    'none';
 
 
-  autoCaptured =
-    true;
+  retakeButton.style.display =
+    'inline-block';
 
 
-  try{
+  useButton.style.display =
+    'inline-block';
 
-    instruction.textContent =
-      'Scanning ID...';
 
+  reviewText.style.display =
+    'block';
 
-    const image =
-      correctDocument(
-        card
-      );
 
+  instruction.textContent =
+    'Review your Student ID photo.';
 
-    capturedData =
-      image;
 
+  status.textContent =
+    'Choose Retake or Use This ID.';
 
-    capturedImage.src =
-      image;
 
-
-    capturedImage.style.display =
-      'block';
-
-
-    video.style.display =
-      'none';
-
-
-    guide.style.display =
-      'none';
-
-
-    retakeButton.style.display =
-      'inline-block';
-
-
-    useButton.style.display =
-      'inline-block';
-
-
-    instruction.textContent =
-      '✓ ID captured successfully';
-
-
-    status.textContent =
-      'Review the scanned ID before continuing.';
-
-
-    stopCamera();
-
-  }
-  catch(error){
-
-    console.error(
-      error
-    );
-
-
-    autoCaptured =
-      false;
-
-
-    showError(
-      'Unable to crop the ID. Please try again.'
-    );
-
-  }
-
-}
-
-
-/* ==========================================================
-   SCAN LOOP
-   ========================================================== */
-
-function beginScanning(){
-
-  if(
-    scanTimer
-  ){
-
-    clearTimeout(
-      scanTimer
-    );
-
-  }
-
-
-  scanFrame();
-
-}
-
-
-function scanFrame(){
-
-  if(
-    scanning ||
-    autoCaptured
-  ){
-
-    return;
-
-  }
-
-
-  if(
-    !opencvReady
-  ){
-
-    status.textContent =
-      'Loading document scanner...';
-
-
-    scheduleNext();
-
-    return;
-
-  }
-
-
-  scanning =
-    true;
-
-
-  try{
-
-    const card =
-      detectDocument();
-
-
-    const stable =
-      checkStable(
-        card
-      );
-
-
-    if(
-      card
-    ){
-
-      guide.classList.add(
-        'detected'
-      );
-
-
-      if(
-        stable
-      ){
-
-        instruction.textContent =
-          'ID detected. Hold still...';
-
-
-        autoCapture(
-          card
-        );
-
-
-        return;
-
-      }
-
-
-      instruction.textContent =
-        'ID detected. Hold still...';
-
-
-      status.textContent =
-        'Preparing automatic capture...';
-
-    }
-    else{
-
-      guide.classList.remove(
-        'detected'
-      );
-
-
-      instruction.textContent =
-        'Position your Student ID in the center.';
-
-
-      status.textContent =
-        'Searching for the ID boundaries...';
-
-    }
-
-  }
-  catch(error){
-
-    console.error(
-      'Scan error:',
-      error
-    );
-
-  }
-  finally{
-
-    scanning =
-      false;
-
-  }
-
-
-  scheduleNext();
-
-}
-
-
-function scheduleNext(){
-
-  if(
-    autoCaptured
-  ){
-
-    return;
-
-  }
-
-
-  scanTimer =
-    setTimeout(
-      scanFrame,
-      300
-    );
+  stopCamera();
 
 }
 
@@ -1813,19 +935,17 @@ function scheduleNext(){
    RETAKE
    ========================================================== */
 
-async function retakeScan(){
+async function retakePhoto(){
 
   capturedData =
     null;
 
-  autoCaptured =
-    false;
 
-  lastCard =
-    null;
+  clearError();
 
-  stableFrames =
-    0;
+
+  capturedImage.src =
+    '';
 
 
   capturedImage.style.display =
@@ -1840,9 +960,8 @@ async function retakeScan(){
     'block';
 
 
-  guide.classList.remove(
-    'detected'
-  );
+  takeButton.style.display =
+    'inline-block';
 
 
   retakeButton.style.display =
@@ -1853,12 +972,16 @@ async function retakeScan(){
     'none';
 
 
+  reviewText.style.display =
+    'none';
+
+
   instruction.textContent =
     'Starting camera...';
 
 
   status.textContent =
-    'Position your Student ID in the center.';
+    'Position your Student ID inside the guide.';
 
 
   await startCamera();
@@ -1867,23 +990,31 @@ async function retakeScan(){
 
 
 /* ==========================================================
-   USE SCAN
+   USE PHOTO
    ========================================================== */
 
-function useScan(){
+function usePhoto(){
+
+  clearError();
+
 
   if(
     !capturedData
   ){
 
     showError(
-      'No scanned ID is available.'
+      'Please take a photo first.'
     );
 
     return;
 
   }
 
+
+  /*
+   * Send captured image back
+   * to the main application.
+   */
 
   if(
     window.opener
@@ -1892,6 +1023,7 @@ function useScan(){
     window.opener.postMessage(
 
       {
+
         type:
           'STUDENT_ID_CAPTURED',
 
@@ -1908,7 +1040,11 @@ function useScan(){
 
 
   instruction.textContent =
-    'Student ID accepted. Returning...';
+    'Student ID accepted. Returning to the application...';
+
+
+  status.textContent =
+    '';
 
 
   stopCamera();
@@ -1933,29 +1069,13 @@ function useScan(){
 function stopCamera(){
 
   if(
-    scanTimer
-  ){
-
-    clearTimeout(
-      scanTimer
-    );
-
-    scanTimer =
-      null;
-
-  }
-
-
-  if(
     stream
   ){
 
     stream
       .getTracks()
       .forEach(
-        function(
-          track
-        ){
+        function(track){
 
           track.stop();
 
@@ -1969,14 +1089,8 @@ function stopCamera(){
   }
 
 
-  if(
-    video
-  ){
-
-    video.srcObject =
-      null;
-
-  }
+  video.srcObject =
+    null;
 
 }
 
@@ -1996,8 +1110,10 @@ window.addEventListener(
       window.opener.postMessage(
 
         {
+
           type:
             'ID_CAMERA_READY'
+
         },
 
         '*'
@@ -2029,7 +1145,7 @@ window.addEventListener(
     ){
 
       status.textContent =
-        'Scanner ready.';
+        'Camera ready.';
 
     }
 
@@ -2038,92 +1154,24 @@ window.addEventListener(
 
 
 /* ==========================================================
-   BUTTONS
+   BUTTON FUNCTIONS
    ========================================================== */
 
-window.retakeScan =
-  retakeScan;
+window.takePhoto =
+  takePhoto;
 
 
-window.useScan =
-  useScan;
+window.retakePhoto =
+  retakePhoto;
+
+
+window.usePhoto =
+  usePhoto;
 
 
 /* ==========================================================
-   INITIALIZE
+   CLEANUP
    ========================================================== */
-
-async function initialize(){
-
-  /*
-   * CAMERA FIRST.
-   */
-
-  try{
-
-    await startCamera();
-
-  }
-  catch(error){
-
-    console.error(
-      error
-    );
-
-    instruction.textContent =
-      'Camera could not start.';
-
-    showError(
-      error.message ||
-      'Unable to access the camera.'
-    );
-
-    return;
-
-  }
-
-
-  /*
-   * OPEN SCANNER AFTER CAMERA IS
-   * ALREADY VISIBLE.
-   */
-
-  try{
-
-    status.textContent =
-      'Loading document scanner...';
-
-
-    await loadOpenCV();
-
-
-    status.textContent =
-      'Document scanner ready.';
-
-
-    beginScanning();
-
-  }
-  catch(error){
-
-    console.error(
-      'OpenCV error:',
-      error
-    );
-
-
-    status.textContent =
-      'Scanner could not load.';
-
-
-    showError(
-      'The document scanner library could not be loaded.'
-    );
-
-  }
-
-}
-
 
 window.addEventListener(
   'beforeunload',
@@ -2131,9 +1179,14 @@ window.addEventListener(
 );
 
 
-initialize();
+/* ==========================================================
+   START
+   ========================================================== */
+
+startCamera();
 
 </script>
 
 </body>
+
 </html>
