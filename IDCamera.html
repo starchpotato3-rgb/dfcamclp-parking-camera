@@ -599,25 +599,15 @@
 ></script>
 
 
-<script type="module">
-
-import {
-  FilesetResolver,
-  FaceLandmarker
-}
-from
-'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304';
-
-
-/*
- * ==========================================================
- * GLOBAL VARIABLES
- * ==========================================================
- */
+<script>
 
 let stream = null;
 
 let faceLandmarker = null;
+
+let FilesetResolver = null;
+
+let FaceLandmarker = null;
 
 let scanTimer = null;
 
@@ -2727,7 +2717,7 @@ async function startCamera(){
           video:{
 
             facingMode:
-              'environment',
+  'user',
 
             width:{
               ideal:640
@@ -3011,187 +3001,161 @@ async function scanFrame(){
 async function initialize(){
 
   /*
-   * IMPORTANT:
-   *
-   * Camera starts FIRST.
-   * We do not wait for OpenCV or
-   * MediaPipe before opening it.
+   * ========================================================
+   * START CAMERA FIRST
+   * ========================================================
    */
 
   instruction.textContent =
     'Starting camera...';
 
 
-  await startCamera();
+  try{
+
+    await startCamera();
+
+  }
+  catch(error){
+
+    console.error(
+      'Camera startup error:',
+      error
+    );
+
+    showError(
+      'Unable to start the camera. Please allow camera access and refresh the page.'
+    );
+
+    return;
+
+  }
 
 
   /*
-   * OpenCV and MediaPipe load AFTER
-   * the camera is already visible.
+   * ========================================================
+   * LOAD OPENCV AFTER CAMERA STARTS
+   * ========================================================
    */
 
-  setTimeout(
-    async function(){
+  try{
 
-      try{
-
-        instruction.textContent =
-          'Camera ready. Loading document scanner...';
+    instruction.textContent =
+      'Camera ready. Loading document scanner...';
 
 
-        /*
-         * OpenCV is already included
-         * as a normal script.
-         */
-
-        const cvReady =
-          await waitForOpenCV();
+    const opencvReady =
+      await waitForOpenCV();
 
 
-        if(!cvReady){
+    if(!opencvReady){
 
-          throw new Error(
-            'OpenCV failed to load.'
-          );
+      throw new Error(
+        'OpenCV did not load.'
+      );
+
+    }
+
+  }
+  catch(error){
+
+    console.error(
+      'OpenCV error:',
+      error
+    );
+
+    instruction.textContent =
+      'Camera ready. Document scanner is loading...';
+
+  }
+
+
+  /*
+   * ========================================================
+   * LOAD MEDIAPIPE AFTER CAMERA
+   * ========================================================
+   */
+
+  try{
+
+    instruction.textContent =
+      'Loading face verification...';
+
+
+    const visionModule =
+      await import(
+        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304'
+      );
+
+
+    FilesetResolver =
+      visionModule.FilesetResolver;
+
+
+    FaceLandmarker =
+      visionModule.FaceLandmarker;
+
+
+    const vision =
+      await FilesetResolver.forVisionTasks(
+
+        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm'
+
+      );
+
+
+    faceLandmarker =
+      await FaceLandmarker.createFromOptions(
+
+        vision,
+
+        {
+
+          baseOptions:{
+
+            modelAssetPath:
+              'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+
+            delegate:
+              'GPU'
+
+          },
+
+          runningMode:
+            'VIDEO',
+
+          numFaces:
+            1,
+
+          outputFaceBlendshapes:
+            false
 
         }
 
-
-        instruction.textContent =
-          'Loading face verification...';
+      );
 
 
-        const vision =
-          await FilesetResolver.forVisionTasks(
+    instruction.textContent =
+      'Scanner ready. Position your Student ID in the center.';
 
-            'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm'
+  }
+  catch(error){
 
-          );
+    console.error(
+      'MediaPipe loading error:',
+      error
+    );
 
+    /*
+     * Keep the camera running even if
+     * face detection fails to initialize.
+     */
 
-        faceLandmarker =
-          await FaceLandmarker.createFromOptions(
+    instruction.textContent =
+      'Camera ready. Position your Student ID in the center.';
 
-            vision,
-
-            {
-
-              baseOptions:{
-
-                modelAssetPath:
-
-                  'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
-
-                delegate:
-                  'GPU'
-
-              },
-
-              runningMode:
-                'VIDEO',
-
-              numFaces:
-                1,
-
-              outputFaceBlendshapes:
-                false
-
-            }
-
-          );
-
-
-        instruction.textContent =
-          'Scanner ready. Position your Student ID in the center.';
-
-      }
-      catch(error){
-
-        console.error(
-          'Scanner library error:',
-          error
-        );
-
-
-        /*
-         * Camera stays open.
-         */
-
-        instruction.textContent =
-          'Camera ready. Position your Student ID in the center.';
-
-      }
-
-    },
-    300
-  );
+  }
 
 }
-
-
-/*
- * ==========================================================
- * OPENCV WAIT
- * ==========================================================
- */
-
-function waitForOpenCV(){
-
-  return new Promise(
-    function(resolve){
-
-      const start =
-        Date.now();
-
-
-      const timer =
-        setInterval(
-          function(){
-
-            if(
-              window.cv &&
-              window.cv.Mat &&
-              window.cv.matFromImageData
-            ){
-
-              clearInterval(
-                timer
-              );
-
-              resolve(
-                true
-              );
-
-              return;
-
-            }
-
-
-            if(
-              Date.now() -
-              start >
-              15000
-            ){
-
-              clearInterval(
-                timer
-              );
-
-              resolve(
-                false
-              );
-
-            }
-
-          },
-          200
-        );
-
-    }
-  );
-
-}
-
 
 /*
  * ==========================================================
