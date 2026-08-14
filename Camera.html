@@ -2,215 +2,226 @@
 <html>
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1"
-  >
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1"
+>
 
-  <title>DFCAMCLP Parking ID Selfie</title>
+<title>DFCAMCLP Parking ID Selfie</title>
 
-  <style>
+<style>
 
-    *{
-      box-sizing:border-box;
-    }
+*{
+  box-sizing:border-box;
+}
 
-    body{
-      margin:0;
-      min-height:100vh;
-      background:#f4f7fb;
-      font-family:Arial,sans-serif;
-      color:#172033;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:18px;
-    }
+body{
+  margin:0;
+  min-height:100vh;
+  padding:18px;
+  font-family:Arial,sans-serif;
+  background:#f4f7fb;
+  color:#172033;
 
-    .card{
-      width:100%;
-      max-width:620px;
-      background:#fff;
-      border-radius:20px;
-      padding:20px;
-      box-shadow:0 10px 35px rgba(0,0,0,.12);
-      text-align:center;
-    }
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-    h1{
-      margin:0 0 6px;
-    }
+.card{
+  width:100%;
+  max-width:620px;
+  background:white;
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 10px 35px rgba(0,0,0,.12);
+  text-align:center;
+}
 
-    .muted{
-      color:#667085;
-    }
+h1{
+  margin:0 0 6px;
+}
 
-    .camera-wrap{
-      width:100%;
-      max-width:460px;
-      aspect-ratio:1 / 1;
-      margin:20px auto;
-      position:relative;
-      overflow:hidden;
-      border-radius:18px;
-      background:#111827;
-    }
+.muted{
+  color:#667085;
+}
 
-    video,
-    canvas,
-    #capturedImage{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
+.camera-wrap{
+  width:100%;
+  max-width:460px;
+  aspect-ratio:1/1;
+  margin:20px auto;
+  position:relative;
+  overflow:hidden;
+  border-radius:18px;
+  background:#111827;
+}
 
-    video{
-      display:block;
-    }
+video,
+canvas,
+#capturedImage{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
 
-    canvas{
-      display:none;
-    }
+video{
+  display:block;
+}
 
-    #capturedImage{
-      display:none;
-    }
+canvas{
+  display:none;
+}
 
-    .face-guide{
-      position:absolute;
-      left:50%;
-      top:50%;
-      width:58%;
-      height:72%;
-      transform:translate(-50%,-50%);
-      border:3px solid rgba(255,255,255,.95);
-      border-radius:48%;
-      pointer-events:none;
-      box-shadow:0 0 0 9999px rgba(0,0,0,.28);
-      transition:border-color .2s ease;
-    }
+#capturedImage{
+  display:none;
+}
 
-    .face-guide.ready{
-      border-color:#22c55e;
-    }
+.face-guide{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:58%;
+  height:72%;
+  transform:translate(-50%,-50%);
 
-    .instruction{
-      margin:8px 0 0;
-      font-weight:700;
-      font-size:15px;
-    }
+  border:3px solid white;
+  border-radius:48%;
 
-    .camera-status{
-      font-size:13px;
-      margin-top:8px;
-      color:#667085;
-    }
+  pointer-events:none;
 
-    .check-list{
-      display:grid;
-      gap:7px;
-      margin:16px 0;
-      text-align:left;
-      background:#f8fafc;
-      border:1px solid #e5e7eb;
-      border-radius:14px;
-      padding:14px;
-    }
+  box-shadow:
+    0 0 0 9999px rgba(0,0,0,.28);
+}
 
-    .check{
-      display:flex;
-      align-items:center;
-      gap:9px;
-      font-size:14px;
-    }
+.face-guide.ready{
+  border-color:#22c55e;
+}
 
-    .check-icon{
-      width:22px;
-      height:22px;
-      border-radius:50%;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      background:#e5e7eb;
-      color:#667085;
-      font-size:12px;
-      font-weight:800;
-      flex:0 0 auto;
-    }
+.instruction{
+  margin-top:10px;
+  font-weight:700;
+}
 
-    .check.ok .check-icon{
-      background:#dcfce7;
-      color:#166534;
-    }
+.camera-status{
+  margin-top:8px;
+  font-size:13px;
+  color:#667085;
+}
 
-    .check.bad .check-icon{
-      background:#fee2e2;
-      color:#991b1b;
-    }
+.check-list{
+  display:grid;
+  gap:7px;
+  margin:16px 0;
+  padding:14px;
 
-    .actions{
-      display:flex;
-      justify-content:center;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:16px;
-    }
+  text-align:left;
 
-    button{
-      border:0;
-      border-radius:10px;
-      padding:12px 18px;
-      font-size:15px;
-      font-weight:800;
-      cursor:pointer;
-    }
+  background:#f8fafc;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+}
 
-    button:disabled{
-      opacity:.45;
-      cursor:not-allowed;
-    }
+.check{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-size:14px;
+}
 
-    .primary{
-      background:#1d4ed8;
-      color:#fff;
-    }
+.check-icon{
+  width:22px;
+  height:22px;
+  flex:0 0 auto;
 
-    .secondary{
-      background:#e5e7eb;
-      color:#172033;
-    }
+  border-radius:50%;
 
-    .success{
-      background:#15803d;
-      color:#fff;
-    }
+  display:flex;
+  align-items:center;
+  justify-content:center;
 
-    .error{
-      display:none;
-      margin-top:14px;
-      padding:12px;
-      border-radius:10px;
-      background:#fee2e2;
-      color:#991b1b;
-      font-size:14px;
-    }
+  background:#e5e7eb;
+  color:#667085;
 
-    .success-message{
-      display:none;
-      margin-top:14px;
-      padding:12px;
-      border-radius:10px;
-      background:#dcfce7;
-      color:#166534;
-      font-size:14px;
-      font-weight:700;
-    }
+  font-size:12px;
+  font-weight:800;
+}
 
-  </style>
+.check.ok .check-icon{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.check.bad .check-icon{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.actions{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:13px 20px;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.primary{
+  background:#1d4ed8;
+  color:white;
+}
+
+.secondary{
+  background:#e5e7eb;
+  color:#172033;
+}
+
+.success{
+  background:#15803d;
+  color:white;
+}
+
+.error{
+  display:none;
+  margin-top:14px;
+  padding:12px;
+  border-radius:10px;
+
+  background:#fee2e2;
+  color:#991b1b;
+
+  font-size:14px;
+}
+
+.success-message{
+  display:none;
+  margin-top:14px;
+  padding:12px;
+  border-radius:10px;
+
+  background:#dcfce7;
+  color:#166534;
+
+  font-weight:700;
+}
+
+</style>
 
 </head>
 
@@ -218,152 +229,151 @@
 
 <div class="card">
 
-  <h1>
-    Parking ID Selfie
-  </h1>
+<h1>
+  Parking ID Selfie
+</h1>
 
-  <p class="muted">
-    Take a new photo using your camera.
-    Do not upload an existing photo.
-  </p>
-
-
-  <div class="camera-wrap">
-
-    <video
-      id="video"
-      autoplay
-      playsinline
-      muted
-    ></video>
-
-    <canvas
-      id="canvas"
-    ></canvas>
-
-    <img
-      id="capturedImage"
-      alt="Captured Parking ID photo"
-    >
-
-    <div
-      id="faceGuide"
-      class="face-guide"
-    ></div>
-
-  </div>
+<p class="muted">
+  Take a new photo using your device camera.
+  Do not upload an existing image.
+</p>
 
 
-  <div
-    id="instruction"
-    class="instruction"
+<div class="camera-wrap">
+
+  <video
+    id="video"
+    autoplay
+    playsinline
+    muted
+  ></video>
+
+  <canvas
+    id="canvas"
+  ></canvas>
+
+  <img
+    id="capturedImage"
+    alt="Captured Parking ID photo"
   >
-    Starting camera...
-  </div>
-
-
-  <div class="camera-status">
-    Square ID photo. Face the camera directly,
-    stay centered, smile naturally, and make sure
-    your face is clearly visible.
-  </div>
-
-
-  <div class="check-list">
-
-    <div
-      id="checkFace"
-      class="check bad"
-    >
-      <span class="check-icon">!</span>
-      <span>One face detected</span>
-    </div>
-
-
-    <div
-      id="checkCenter"
-      class="check bad"
-    >
-      <span class="check-icon">!</span>
-      <span>Face centered</span>
-    </div>
-
-
-    <div
-      id="checkFront"
-      class="check bad"
-    >
-      <span class="check-icon">!</span>
-      <span>Face looking straight at camera</span>
-    </div>
-
-
-    <div
-      id="checkLighting"
-      class="check bad"
-    >
-      <span class="check-icon">!</span>
-      <span>Face clearly visible with sufficient lighting</span>
-    </div>
-
-
-    <div
-      id="checkSmile"
-      class="check bad"
-    >
-      <span class="check-icon">!</span>
-      <span>Smile detected</span>
-    </div>
-
-  </div>
-
-
-  <div class="actions">
-
-    <button
-      id="takeButton"
-      class="primary"
-      disabled
-      onclick="takePhoto()"
-    >
-      Take Photo
-    </button>
-
-
-    <button
-      id="retakeButton"
-      class="secondary"
-      style="display:none;"
-      onclick="retakePhoto()"
-    >
-      Retake
-    </button>
-
-
-    <button
-      id="useButton"
-      class="success"
-      style="display:none;"
-      onclick="usePhoto()"
-    >
-      Use This Photo
-    </button>
-
-  </div>
-
 
   <div
-    id="error"
-    class="error"
+    id="faceGuide"
+    class="face-guide"
   ></div>
 
+</div>
+
+
+<div
+  id="instruction"
+  class="instruction"
+>
+  Starting camera...
+</div>
+
+
+<div class="camera-status">
+  Square photo • Look directly at camera •
+  Center your face • Smile • Use sufficient lighting
+</div>
+
+
+<div class="check-list">
 
   <div
-    id="successMessage"
-    class="success-message"
+    id="checkFace"
+    class="check bad"
   >
-    Photo accepted. Returning to the application...
+    <span class="check-icon">!</span>
+    <span>One face detected</span>
   </div>
+
+
+  <div
+    id="checkCenter"
+    class="check bad"
+  >
+    <span class="check-icon">!</span>
+    <span>Face centered</span>
+  </div>
+
+
+  <div
+    id="checkFront"
+    class="check bad"
+  >
+    <span class="check-icon">!</span>
+    <span>Face looking straight at camera</span>
+  </div>
+
+
+  <div
+    id="checkLighting"
+    class="check bad"
+  >
+    <span class="check-icon">!</span>
+    <span>Face clearly visible with sufficient lighting</span>
+  </div>
+
+
+  <div
+    id="checkSmile"
+    class="check bad"
+  >
+    <span class="check-icon">!</span>
+    <span>Smile detected</span>
+  </div>
+
+</div>
+
+
+<div class="actions">
+
+  <button
+    id="takeButton"
+    class="primary"
+    disabled
+    onclick="takePhoto()"
+  >
+    Take Photo
+  </button>
+
+
+  <button
+    id="retakeButton"
+    class="secondary"
+    style="display:none;"
+    onclick="retakePhoto()"
+  >
+    Retake
+  </button>
+
+
+  <button
+    id="useButton"
+    class="success"
+    style="display:none;"
+    onclick="usePhoto()"
+  >
+    Use This Photo
+  </button>
+
+</div>
+
+
+<div
+  id="error"
+  class="error"
+></div>
+
+
+<div
+  id="successMessage"
+  class="success-message"
+>
+  Photo accepted.
+</div>
 
 </div>
 
@@ -383,7 +393,6 @@ let faceLandmarker = null;
 let animationFrameId = null;
 let lastVideoTime = -1;
 let capturedData = null;
-let cameraReady = false;
 
 
 let currentChecks = {
@@ -398,94 +407,39 @@ let currentChecks = {
 
 
 const video =
-  document.getElementById(
-    'video'
-  );
-
+  document.getElementById('video');
 
 const canvas =
-  document.getElementById(
-    'canvas'
-  );
-
+  document.getElementById('canvas');
 
 const capturedImage =
-  document.getElementById(
-    'capturedImage'
-  );
-
+  document.getElementById('capturedImage');
 
 const faceGuide =
-  document.getElementById(
-    'faceGuide'
-  );
-
+  document.getElementById('faceGuide');
 
 const takeButton =
-  document.getElementById(
-    'takeButton'
-  );
-
+  document.getElementById('takeButton');
 
 const retakeButton =
-  document.getElementById(
-    'retakeButton'
-  );
-
+  document.getElementById('retakeButton');
 
 const useButton =
-  document.getElementById(
-    'useButton'
-  );
-
+  document.getElementById('useButton');
 
 const instruction =
-  document.getElementById(
-    'instruction'
-  );
-
-
-const checkFace =
-  document.getElementById(
-    'checkFace'
-  );
-
-
-const checkCenter =
-  document.getElementById(
-    'checkCenter'
-  );
-
-
-const checkFront =
-  document.getElementById(
-    'checkFront'
-  );
-
-
-const checkLighting =
-  document.getElementById(
-    'checkLighting'
-  );
-
-
-const checkSmile =
-  document.getElementById(
-    'checkSmile'
-  );
+  document.getElementById('instruction');
 
 
 function showError(message){
 
-  const el =
-    document.getElementById(
-      'error'
-    );
+  const e =
+    document.getElementById('error');
 
-  el.textContent =
+  e.textContent =
     message;
 
-  el.style.display =
+  e.style.display =
     'block';
 
 }
@@ -493,15 +447,10 @@ function showError(message){
 
 function clearError(){
 
-  const el =
-    document.getElementById(
-      'error'
-    );
+  const e =
+    document.getElementById('error');
 
-  el.textContent =
-    '';
-
-  el.style.display =
+  e.style.display =
     'none';
 
 }
@@ -522,17 +471,10 @@ function setCheck(
     !ok
   );
 
-
-  const icon =
-    element.querySelector(
-      '.check-icon'
-    );
-
-
-  icon.textContent =
-    ok
-      ? '✓'
-      : '!';
+  element
+    .querySelector('.check-icon')
+    .textContent =
+      ok ? '✓' : '!';
 
 }
 
@@ -540,64 +482,61 @@ function setCheck(
 function updateChecks(){
 
   setCheck(
-    checkFace,
+    document.getElementById('checkFace'),
     currentChecks.face
   );
 
-
   setCheck(
-    checkCenter,
+    document.getElementById('checkCenter'),
     currentChecks.center
   );
 
-
   setCheck(
-    checkFront,
+    document.getElementById('checkFront'),
     currentChecks.front
   );
 
-
   setCheck(
-    checkLighting,
+    document.getElementById('checkLighting'),
     currentChecks.lighting
   );
 
-
   setCheck(
-    checkSmile,
+    document.getElementById('checkSmile'),
     currentChecks.smile
   );
 
 
-  const allReady =
+  /*
+   * IMPORTANT:
+   * We now allow the photo button as long
+   * as the face is detected, centered,
+   * front-facing and sufficiently visible.
+   *
+   * Smile is guidance, not a hard blocker.
+   */
+
+  const ready =
     currentChecks.face &&
     currentChecks.center &&
     currentChecks.front &&
-    currentChecks.lighting &&
-    currentChecks.smile;
+    currentChecks.lighting;
 
 
   takeButton.disabled =
-    !allReady;
+    !ready;
 
 
   faceGuide.classList.toggle(
     'ready',
-    allReady
+    ready
   );
 
 
-  if(allReady){
+  if(!currentChecks.face){
 
     instruction.textContent =
-      'Perfect! Hold still and take your photo.';
-
-  }
-
-  else if(!currentChecks.face){
-
-    instruction.textContent =
-      'Place exactly one face inside the guide.';
+      'Place one face inside the guide.';
 
   }
 
@@ -625,67 +564,14 @@ function updateChecks(){
   else if(!currentChecks.smile){
 
     instruction.textContent =
-      'Please smile naturally.';
+      'You may smile naturally, then take your photo.';
 
   }
 
-}
-
-
-async function initializeFaceLandmarker(){
-
-  try{
+  else{
 
     instruction.textContent =
-      'Loading face detection...';
-
-
-    const vision =
-      await FilesetResolver.forVisionTasks(
-        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm'
-      );
-
-
-    faceLandmarker =
-      await FaceLandmarker.createFromOptions(
-        vision,
-        {
-
-          baseOptions:{
-
-            modelAssetPath:
-              'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
-
-            delegate:
-              'GPU'
-
-          },
-
-          runningMode:
-            'VIDEO',
-
-          numFaces:
-            2,
-
-          outputFaceBlendshapes:
-            true
-
-        }
-      );
-
-
-    await startCamera();
-
-  }
-  catch(error){
-
-    console.error(
-      error
-    );
-
-    showError(
-      'Unable to start face detection. Please refresh the page and try again.'
-    );
+      'Perfect! Hold still and take your photo.';
 
   }
 
@@ -694,44 +580,19 @@ async function initializeFaceLandmarker(){
 
 async function startCamera(){
 
-  clearError();
-
-  instruction.textContent =
-    'Requesting camera permission...';
-
-
   try{
-
-    if(
-      !navigator.mediaDevices ||
-      !navigator.mediaDevices.getUserMedia
-    ){
-
-      throw new Error(
-        'Camera API unavailable.'
-      );
-
-    }
-
 
     stream =
       await navigator.mediaDevices.getUserMedia({
 
         video:{
-
-          facingMode:
-            'user',
-
+          facingMode:'user',
           width:{
-            ideal:
-              1080
+            ideal:1080
           },
-
           height:{
-            ideal:
-              1080
+            ideal:1080
           }
-
         },
 
         audio:false
@@ -746,25 +607,19 @@ async function startCamera(){
     await video.play();
 
 
-    cameraReady =
-      true;
-
-
     instruction.textContent =
       'Position your face inside the guide.';
 
 
-    predictWebcam();
+    detectFace();
 
   }
   catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
     showError(
-      'Camera access was denied or unavailable. Please allow camera access in your browser.'
+      'Unable to access your camera. Please allow camera permission and refresh the page.'
     );
 
   }
@@ -772,12 +627,76 @@ async function startCamera(){
 }
 
 
-function predictWebcam(){
+async function initialize(){
+
+  try{
+
+    instruction.textContent =
+      'Loading face detection...';
+
+
+    const vision =
+      await FilesetResolver.forVisionTasks(
+
+        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm'
+
+      );
+
+
+    faceLandmarker =
+      await FaceLandmarker.createFromOptions(
+
+        vision,
+
+        {
+
+          baseOptions:{
+
+            modelAssetPath:
+              'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+
+            delegate:'GPU'
+
+          },
+
+          runningMode:'VIDEO',
+
+          numFaces:1,
+
+          outputFaceBlendshapes:true
+
+        }
+
+      );
+
+
+    await startCamera();
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    showError(
+      'Face detection could not be loaded. Please refresh and try again.'
+    );
+
+  }
+
+}
+
+
+function detectFace(){
 
   if(
     !faceLandmarker ||
-    !cameraReady
+    !video.videoWidth
   ){
+
+    animationFrameId =
+      requestAnimationFrame(
+        detectFace
+      );
 
     return;
 
@@ -785,9 +704,8 @@ function predictWebcam(){
 
 
   if(
-    video.readyState >= 2 &&
     video.currentTime !==
-      lastVideoTime
+    lastVideoTime
   ){
 
     lastVideoTime =
@@ -801,7 +719,7 @@ function predictWebcam(){
       );
 
 
-    processFaceResult(
+    processResult(
       result
     );
 
@@ -810,13 +728,13 @@ function predictWebcam(){
 
   animationFrameId =
     requestAnimationFrame(
-      predictWebcam
+      detectFace
     );
 
 }
 
 
-function processFaceResult(result){
+function processResult(result){
 
   const faces =
     result.faceLandmarks || [];
@@ -826,19 +744,12 @@ function processFaceResult(result){
     faces.length === 1;
 
 
-  if(faces.length !== 1){
+  if(!currentChecks.face){
 
-    currentChecks.center =
-      false;
-
-    currentChecks.front =
-      false;
-
-    currentChecks.lighting =
-      false;
-
-    currentChecks.smile =
-      false;
+    currentChecks.center = false;
+    currentChecks.front = false;
+    currentChecks.lighting = false;
+    currentChecks.smile = false;
 
     updateChecks();
 
@@ -856,7 +767,6 @@ function processFaceResult(result){
       p => p.x
     );
 
-
   const ys =
     landmarks.map(
       p => p.y
@@ -866,14 +776,11 @@ function processFaceResult(result){
   const minX =
     Math.min(...xs);
 
-
   const maxX =
     Math.max(...xs);
 
-
   const minY =
     Math.min(...ys);
-
 
   const maxY =
     Math.max(...ys);
@@ -882,31 +789,26 @@ function processFaceResult(result){
   const centerX =
     (minX + maxX) / 2;
 
-
   const centerY =
     (minY + maxY) / 2;
-
 
   const faceWidth =
     maxX - minX;
 
 
   currentChecks.center =
-    centerX > 0.35 &&
-    centerX < 0.65 &&
-    centerY > 0.35 &&
-    centerY < 0.68 &&
-    faceWidth > 0.25 &&
-    faceWidth < 0.75;
+    centerX > 0.25 &&
+    centerX < 0.75 &&
+    centerY > 0.25 &&
+    centerY < 0.75 &&
+    faceWidth > 0.20;
 
 
   const leftEye =
     landmarks[33];
 
-
   const rightEye =
     landmarks[263];
-
 
   const nose =
     landmarks[1];
@@ -919,7 +821,7 @@ function processFaceResult(result){
     ) / 2;
 
 
-  const horizontalEyeDistance =
+  const eyeDistance =
     Math.abs(
       rightEye.x -
       leftEye.x
@@ -934,21 +836,20 @@ function processFaceResult(result){
 
 
   currentChecks.front =
-    horizontalEyeDistance > 0.08 &&
+    eyeDistance > 0.06 &&
     (
       noseOffset /
-      horizontalEyeDistance
-    ) < 0.22;
+      eyeDistance
+    ) < 0.30;
 
 
   currentChecks.lighting =
-    checkLightingLevel();
+    getLighting();
 
 
   currentChecks.smile =
-    detectSmile(
-      result,
-      landmarks
+    getSmile(
+      result
     );
 
 
@@ -957,7 +858,7 @@ function processFaceResult(result){
 }
 
 
-function checkLightingLevel(){
+function getLighting(){
 
   if(
     !video.videoWidth ||
@@ -969,102 +870,71 @@ function checkLightingLevel(){
   }
 
 
-  const sampleCanvas =
+  const c =
     document.createElement(
       'canvas'
     );
 
 
-  const sampleSize =
-    80;
+  c.width =
+    60;
+
+  c.height =
+    60;
 
 
-  sampleCanvas.width =
-    sampleSize;
+  const ctx =
+    c.getContext('2d');
 
 
-  sampleCanvas.height =
-    sampleSize;
-
-
-  const context =
-    sampleCanvas.getContext(
-      '2d'
-    );
-
-
-  context.drawImage(
+  ctx.drawImage(
     video,
     0,
     0,
-    sampleSize,
-    sampleSize
+    60,
+    60
   );
 
 
-  const pixels =
-    context.getImageData(
+  const data =
+    ctx.getImageData(
       0,
       0,
-      sampleSize,
-      sampleSize
+      60,
+      60
     ).data;
 
 
-  let totalBrightness =
-    0;
-
-
-  const pixelCount =
-    pixels.length / 4;
+  let total = 0;
 
 
   for(
     let i = 0;
-    i < pixels.length;
+    i < data.length;
     i += 4
   ){
 
-    const r =
-      pixels[i];
-
-
-    const g =
-      pixels[i + 1];
-
-
-    const b =
-      pixels[i + 2];
-
-
-    const brightness =
+    total +=
       (
-        0.299 * r +
-        0.587 * g +
-        0.114 * b
+        0.299 * data[i] +
+        0.587 * data[i+1] +
+        0.114 * data[i+2]
       );
-
-
-    totalBrightness +=
-      brightness;
 
   }
 
 
-  const averageBrightness =
-    totalBrightness /
-    pixelCount;
+  const average =
+    total /
+    (data.length / 4);
 
 
-  return averageBrightness >= 55;
+  return average >= 45;
 
 }
 
 
-function detectSmile(
-  result,
-  landmarks
-){
+function getSmile(result){
 
   try{
 
@@ -1074,92 +944,40 @@ function detectSmile(
       result.faceBlendshapes[0].categories;
 
 
-    if(categories){
-
-      const left =
-        categories.find(
-          c =>
-            c.categoryName ===
-            'mouthSmileLeft'
-        );
-
-
-      const right =
-        categories.find(
-          c =>
-            c.categoryName ===
-            'mouthSmileRight'
-        );
-
-
-      if(left && right){
-
-        return (
-          left.score > 0.35 &&
-          right.score > 0.35
-        );
-
-      }
-
+    if(!categories){
+      return false;
     }
+
+
+    const left =
+      categories.find(
+        c =>
+          c.categoryName ===
+          'mouthSmileLeft'
+      );
+
+
+    const right =
+      categories.find(
+        c =>
+          c.categoryName ===
+          'mouthSmileRight'
+      );
+
+
+    return !!(
+      left &&
+      right &&
+      left.score > 0.20 &&
+      right.score > 0.20
+    );
 
   }
   catch(error){
 
-    console.warn(
-      'Blendshape smile detection failed.',
-      error
-    );
-
-  }
-
-
-  const leftMouth =
-    landmarks[61];
-
-
-  const rightMouth =
-    landmarks[291];
-
-
-  const upperLip =
-    landmarks[13];
-
-
-  const lowerLip =
-    landmarks[14];
-
-
-  const mouthWidth =
-    Math.abs(
-      rightMouth.x -
-      leftMouth.x
-    );
-
-
-  const mouthHeight =
-    Math.abs(
-      lowerLip.y -
-      upperLip.y
-    );
-
-
-  if(
-    mouthWidth <= 0
-  ){
-
     return false;
 
   }
-
-
-  return (
-    mouthWidth /
-    Math.max(
-      mouthHeight,
-      0.01
-    )
-  ) > 3.0;
 
 }
 
@@ -1169,30 +987,19 @@ function takePhoto(){
   clearError();
 
 
+  /*
+   * Hard requirements only.
+   */
+
   if(
     !currentChecks.face ||
     !currentChecks.center ||
     !currentChecks.front ||
-    !currentChecks.lighting ||
-    !currentChecks.smile
+    !currentChecks.lighting
   ){
 
     showError(
-      'Please satisfy all photo requirements first.'
-    );
-
-    return;
-
-  }
-
-
-  if(
-    !video.videoWidth ||
-    !video.videoHeight
-  ){
-
-    showError(
-      'Camera is not ready.'
+      'Please position your face correctly before taking the photo.'
     );
 
     return;
@@ -1207,40 +1014,48 @@ function takePhoto(){
     );
 
 
+  if(!size){
+
+    showError(
+      'Camera is not ready yet.'
+    );
+
+    return;
+
+  }
+
+
   canvas.width =
     size;
-
 
   canvas.height =
     size;
 
 
-  const context =
-    canvas.getContext(
-      '2d'
-    );
+  const ctx =
+    canvas.getContext('2d');
 
 
-  const sourceX =
+  const x =
     (
       video.videoWidth -
       size
     ) / 2;
 
 
-  const sourceY =
+  const y =
     (
       video.videoHeight -
       size
     ) / 2;
 
 
-  context.drawImage(
+  ctx.drawImage(
 
     video,
 
-    sourceX,
-    sourceY,
+    x,
+    y,
 
     size,
     size,
@@ -1297,11 +1112,11 @@ function takePhoto(){
 
 function retakePhoto(){
 
-  clearError();
-
-
   capturedData =
     null;
+
+
+  clearError();
 
 
   capturedImage.style.display =
@@ -1335,9 +1150,6 @@ function retakePhoto(){
 
 function usePhoto(){
 
-  clearError();
-
-
   if(!capturedData){
 
     showError(
@@ -1349,23 +1161,34 @@ function usePhoto(){
   }
 
 
-  if(window.opener){
+  if(
+    !window.opener
+  ){
 
-    window.opener.postMessage(
-
-      {
-        type:
-          'PARKING_SELFIE_CAPTURED',
-
-        image:
-          capturedData
-      },
-
-      '*'
-
+    showError(
+      'The application window could not be found. Please close this camera page and open the camera again from the application.'
     );
 
+    return;
+
   }
+
+
+  window.opener.postMessage(
+
+    {
+
+      type:
+        'PARKING_SELFIE_CAPTURED',
+
+      image:
+        capturedData
+
+    },
+
+    '*'
+
+  );
 
 
   document
@@ -1393,9 +1216,7 @@ function usePhoto(){
 
 function stopCamera(){
 
-  if(
-    animationFrameId
-  ){
+  if(animationFrameId){
 
     cancelAnimationFrame(
       animationFrameId
@@ -1412,11 +1233,8 @@ function stopCamera(){
     stream
       .getTracks()
       .forEach(
-        function(track){
-
-          track.stop();
-
-        }
+        track =>
+          track.stop()
       );
 
     stream =
@@ -1433,7 +1251,7 @@ window.addEventListener(
 );
 
 
-initializeFaceLandmarker();
+initialize();
 
 </script>
 
