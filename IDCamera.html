@@ -997,7 +997,6 @@ function usePhoto(){
 
   clearError();
 
-
   if(
     !capturedData
   ){
@@ -1009,12 +1008,6 @@ function usePhoto(){
     return;
 
   }
-
-
-  /*
-   * Send captured image back
-   * to the main application.
-   */
 
   if(
     window.opener
@@ -1038,17 +1031,13 @@ function usePhoto(){
 
   }
 
-
   instruction.textContent =
-    'Student ID accepted. Returning to the application...';
-
+    'Student ID photo captured. Returning to the application...';
 
   status.textContent =
     '';
 
-
   stopCamera();
-
 
   setTimeout(
     function(){
